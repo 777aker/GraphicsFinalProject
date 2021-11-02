@@ -1,0 +1,39 @@
+Final Project
+
+Kelley Kelley
+CSCI 5229 Fall 2021
+
+Time Spent:
+
+Key Bindings:
+Player Controls:
+
+
+Light Controls:
+
+
+Grading/Debug Controls:
+
+
+Requirements from proposal:
+- Precedurally generated forest with drastically different day night cycle.
+- Walk in any direction forever and the scene will keep adding objects and terrain while removing far away objects and terrain.
+- Terrain change in elevation but player remain same height on ground.
+- AI that moves toward the player during the day and away from the player at night.
+- AI monster from front but simple and friendly from behind.
+- Day is typical forest lit by one revolving light source
+- Night player has flashlight and scenery changes to be spookier, with shaders on it. Trees will have different textures, branches will move, lighting within the trees like lightning bugs and stars.
+- Objects generated: trees, fallen logs, bushes, each with a bit of randomness to them.
+- When AI is close during the day red veins grow on the screen.
+- When AI is far at night cold snowy effect on screen
+- For easier grading: turn AI off, can move up and down freely, can control the time/day night cycle
+
+Stretch Goals:
+1) player collision with procedural objects
+2) player jump so can jump over some objects
+3) particles to the trees at night or during day like leaves falling
+4) wind that makes trees and particles sway
+5) add buildings to objects generated like a cabin
+6) add furniture to buildings with collisions and multi floored buildings
+7) biomes. So areas generated and areas have a theme
+8) cities biome with very simple people that walk randomly
