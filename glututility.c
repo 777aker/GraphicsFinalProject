@@ -1,5 +1,11 @@
 #include "glututility.h"
 
+
+
+// Below this line is all class stuff
+//----------------------------------------------------------------
+
+
 //
 //  Print message to stderr and exit
 //

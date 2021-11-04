@@ -57,4 +57,6 @@ void Project(double fov,double asp,double dim);
 void ErrCheck(const char* where);
 int  LoadOBJ(const char* file);
 
+
+
 #endif
