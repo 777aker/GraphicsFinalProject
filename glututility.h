@@ -1,6 +1,13 @@
 #ifndef GLUTUTILITY_H
 #define GLUTUTILITY_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <math.h>
+#include <ctype.h>
+
 // GLEW _MUST_ be included first
 #ifdef USEGLEW
 #include <GL/glew.h>
@@ -43,3 +50,11 @@
 #define Sin(x) (sin((x)*3.14159265/180))
 
 // convenience functions from class
+void Print(const char* format , ...);
+void Fatal(const char* format , ...);
+unsigned int LoadTexBMP(const char* file);
+void Project(double fov,double asp,double dim);
+void ErrCheck(const char* where);
+int  LoadOBJ(const char* file);
+
+#endif
