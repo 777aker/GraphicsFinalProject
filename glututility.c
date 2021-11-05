@@ -1,9 +1,73 @@
 #include "glututility.h"
 
 bool debug = true;
+// from my hw6, calculates surface normals
+void doanormal(double one[3], double two[3], double three[3]) {
+    // this takes in 3 points then
+    // sets the vector to point out
+    // first, make a vector
+    // this is one of our edges
+    // using 0,1,2 is confusing
+    int x = 0, y = 1, z = 2;
+    double firstvector[3];
+    firstvector[x] = one[x] - two[x];
+    firstvector[y] = one[y] - two[y];
+    firstvector[z] = one[z] - two[z];
+    // then, make a vector
+    // another of our edges
+    // did three - two so that both vectors point
+    // away from the point two
+    // but not sure it actually matters
+    double secondvector[3];
+    secondvector[x] = three[x] - two[x];
+    secondvector[y] = three[y] - two[y];
+    secondvector[z] = three[z] - two[z];
+    // then do a cross product
+    double normal[3];
+    normal[x] = firstvector[y] * secondvector[z] - firstvector[z] * secondvector[y];
+    normal[y] = firstvector[z] * secondvector[x] - firstvector[x] * secondvector[z];
+    normal[z] = firstvector[x] * secondvector[y] - firstvector[y] * secondvector[x];
+    // then, set normal
+    // mmm, math makes things so much easier
+    glNormal3f(normal[x], normal[y], normal[z]);
+}
 
 // Below this line is all class stuff
 //----------------------------------------------------------------
+
+/*
+ *  Draw a ball
+ *     at (x,y,z)
+ *     radius (r)
+ */
+static void ball(double x, double y, double z, double r)
+{
+    //  Save transformation
+    glPushMatrix();
+    //  Offset, scale and rotate
+    glTranslated(x, y, z);
+    glScaled(r, r, r);
+    //  White ball with yellow specular
+    float yellow[] = { 1.0,1.0,0.0,1.0 };
+    float Emission[] = { 0.0,0.0,0.01 * emission,1.0 };
+    glColor3f(1, 1, 1);
+    glMaterialf(GL_FRONT, GL_SHININESS, shiny);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, yellow);
+    glMaterialfv(GL_FRONT, GL_EMISSION, Emission);
+    //  Bands of latitude
+    for (int ph = -90; ph < 90; ph += inc)
+    {
+        glBegin(GL_QUAD_STRIP);
+        for (int th = 0; th <= 360; th += 2 * inc)
+        {
+            Vertex(th, ph);
+            Vertex(th, ph + inc);
+        }
+        glEnd();
+    }
+    //  Undo transofrmations
+    glPopMatrix();
+}
 
 //
 //  Print message to stderr and exit

@@ -22,6 +22,7 @@ void initgrid();
 
 // --- variables ---
 //extern type name; then define in c
-
+extern int gensize;
+extern float ground[100][100];
 
 #endif

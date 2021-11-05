@@ -1,7 +1,7 @@
 // credits: https://gist.github.com/nowl/828013
 
 //#include <stdio.h>
-#include "perlin.h";
+#include "perlin.h"
 
 static int SEED = 0;
 

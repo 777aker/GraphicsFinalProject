@@ -12,6 +12,13 @@ enum camera proj = firstperson;
 int th = 40;
 // elevation of view angle
 int ph = 15;
+// terrain stuff
+int gensize = 100;
+float ground[100][100];
+// sun stuff
+float Position = {
+	
+};
 
 void display() {
 	// erase the window and depth buffer
@@ -21,6 +28,9 @@ void display() {
 	glEnable(GL_DEPTH_TEST);
 	// undo previous displays
 	glLoadIdentity();
+
+	// shade model
+	glShadeModel(GL_SMOOTH);
 
 	switch (proj) {
 	case perspective:
@@ -38,23 +48,42 @@ void display() {
 		break;
 	}
 
-	glEnable(GL_CULL_FACE);
-	glLineWidth(3);
-	glBegin(GL_LINE_LOOP);
-	//glNormal3f(0, +1, 0);
-	glColor3f(.2, 1, .2);
-	glVertex3f(-50, 0, 50);
-	glVertex3f(50, 0, 50);
-	glVertex3f(50, 0, -50);
-	glVertex3f(-50, 0, -50);
-	glEnd();
-	glBegin(GL_QUADS);
-	glVertex3f(-50, 0, 50);
-	glVertex3f(50, 0, 50);
-	glVertex3f(50, 0, -50);
-	glVertex3f(-50, 0, -50);
-	glEnd();
+	// draw ball representing light
+	glColor3f(1, 1, 1);
+	ball(Position[0], Position[1], Position[2]);
+	// enable lighting stuff
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_LIGHTING);
+	// stuff in lighting but not in shaders
 
+	// back to in shaders
+	glEnable(GL_LIGHT0);
+	// set the lighting stuff
+	glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, Position);
+
+	// draw our perlin ground
+	glColor3f(.2, 1, .2);
+	// set material stuff
+
+	// disable cull face
+	glDisable(GL_CULL_FACE);
+	int i, j;
+	for (i = 0; i < gensize-1; i++) {
+		glBegin(GL_QUADS);
+		for (j = 0; j < gensize; j++) {
+			glVertex3f(i - 50, ground[i][j], j - 50);
+			glVertex3f(i - 49, ground[i][j], j - 50);
+
+		}
+		glEnd();
+	}
+
+	// disable lighting
+	glDisable(GL_LIGHTING);
+	// draw some information to screen for debugging
 	if (debug) {
 		glColor3f(1, 1, 1);
 		glWindowPos2i(5, 5);
@@ -67,7 +96,12 @@ void display() {
 }
 
 void initgrid() {
-
+	int i, j;
+	for (i = 0; i < gensize; i++) {
+		for (j = 0; j < gensize; j++) {
+			ground[i][j] = perlin2d(i, j, .1, 4);
+		}
+	}
 }
 
 void initdebug() {
