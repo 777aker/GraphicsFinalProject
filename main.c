@@ -23,8 +23,6 @@ int main(int argc, char* argv[]) {
 		initdebug();
 	}
 
-	initgrid();
-
 	glutMainLoop();
 	
 	return 0;

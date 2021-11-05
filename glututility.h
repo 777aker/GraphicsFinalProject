@@ -68,5 +68,7 @@ unsigned int LoadTexBMP(const char* file);
 void Project(enum camera cp, double fov, double asp, double dim);
 void ErrCheck(const char* where);
 int  LoadOBJ(const char* file);
+void ball(double x, double y, double z, double r);
+void Vertex(double th, double ph);
 
 #endif

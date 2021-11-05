@@ -14,11 +14,15 @@ int th = 40;
 int ph = 15;
 // terrain stuff
 int gensize = 100;
-float ground[100][100];
-// sun stuff
-float Position = {
-	
-};
+// sun stuff ---------------------------- light stuff
+//float Position[4];
+double zh = 0;
+int distance = 20;
+int ylight = 0;
+int local = 0;
+// ----------------------------------
+// player position
+float playerpos[3] = { 0,0,0 };
 
 void display() {
 	// erase the window and depth buffer
@@ -29,7 +33,7 @@ void display() {
 	// undo previous displays
 	glLoadIdentity();
 
-	// shade model
+	// shade model ------------- light
 	glShadeModel(GL_SMOOTH);
 
 	switch (proj) {
@@ -48,21 +52,36 @@ void display() {
 		break;
 	}
 
-	// draw ball representing light
+	// draw ball representing light ------------ lighting stuff
+	float Position[4] = { distance * Cos(zh), distance * Sin(zh), ylight, 1.0 };
 	glColor3f(1, 1, 1);
-	ball(Position[0], Position[1], Position[2]);
+	ball(Position[0], Position[1], Position[2], 5);
 	// enable lighting stuff
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
 	// stuff in lighting but not in shaders
-
+	//  Location of viewer for specular calculations
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, local);
+	//  glColor sets ambient and diffuse color materials
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
 	// back to in shaders
 	glEnable(GL_LIGHT0);
 	// set the lighting stuff
+	float Ambient[] = {
+		.1, .1, .1, 1.0
+	};
+	float Diffuse[] = {
+		.5, .5, .5, 1.0
+	};
+	float Specular[] = {
+		0, 0, 0, 1.0
+	};
 	glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
 	glLightfv(GL_LIGHT0, GL_POSITION, Position);
+	// lighting stuff ends ------------------------------------
 
 	// draw our perlin ground
 	glColor3f(.2, 1, .2);
@@ -70,13 +89,39 @@ void display() {
 
 	// disable cull face
 	glDisable(GL_CULL_FACE);
+
+	// lighting testing
+	/*
+	float white[] = { 1,1,1,1 };
+	float black[] = { 0,0,0,1 };
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, .2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
+	glBegin(GL_QUADS);
+	glNormal3f(0, 1, 0);
+	glVertex3f(-50, 0, -50);
+	glVertex3f(-50, 0, 50);
+	glVertex3f(50, 0, 50);
+	glVertex3f(50, 0, -50);
+	glEnd();
+	*/
+
+	//---------------- perlin ground
 	int i, j;
+	float white[] = { 1,1,1,1 };
+	float black[] = { 0,0,0,1 };
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, .2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
 	for (i = 0; i < gensize-1; i++) {
 		glBegin(GL_QUADS);
-		for (j = 0; j < gensize; j++) {
+		for (j = 0; j < gensize-1; j++) {
+			float y1 = perlin2d(i, j, .1, 4);
+			float y2 = perlin2d(i, j + 1, .1, 4);
+			float y3
 			glVertex3f(i - 50, ground[i][j], j - 50);
 			glVertex3f(i - 49, ground[i][j], j - 50);
-
+			glVertex3f()
 		}
 		glEnd();
 	}
@@ -95,15 +140,6 @@ void display() {
 	glutSwapBuffers();
 }
 
-void initgrid() {
-	int i, j;
-	for (i = 0; i < gensize; i++) {
-		for (j = 0; j < gensize; j++) {
-			ground[i][j] = perlin2d(i, j, .1, 4);
-		}
-	}
-}
-
 void initdebug() {
 	dim = 50.0;
 	proj = perspective;
@@ -111,7 +147,9 @@ void initdebug() {
 
 // called when nothing else to do
 void idle() {
-
+	//  Elapsed time in seconds
+	double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
+	zh = fmod(90 * t, 360.0);
 	// redisplay the scene
 	glutPostRedisplay();
 }

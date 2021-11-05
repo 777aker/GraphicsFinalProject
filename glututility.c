@@ -36,11 +36,25 @@ void doanormal(double one[3], double two[3], double three[3]) {
 //----------------------------------------------------------------
 
 /*
+ *  Draw vertex in polar coordinates with normal
+ */
+void Vertex(double th, double ph)
+{
+    double x = Sin(th) * Cos(ph);
+    double y = Cos(th) * Cos(ph);
+    double z = Sin(ph);
+    //  For a sphere at the origin, the position
+    //  and normal vectors are the same
+    glNormal3d(x, y, z);
+    glVertex3d(x, y, z);
+}
+
+/*
  *  Draw a ball
  *     at (x,y,z)
  *     radius (r)
  */
-static void ball(double x, double y, double z, double r)
+void ball(double x, double y, double z, double r)
 {
     //  Save transformation
     glPushMatrix();
@@ -49,12 +63,13 @@ static void ball(double x, double y, double z, double r)
     glScaled(r, r, r);
     //  White ball with yellow specular
     float yellow[] = { 1.0,1.0,0.0,1.0 };
-    float Emission[] = { 0.0,0.0,0.01 * emission,1.0 };
+    float Emission[] = { 0.0,0.0,0.01 * 50,1.0 };
     glColor3f(1, 1, 1);
-    glMaterialf(GL_FRONT, GL_SHININESS, shiny);
+    glMaterialf(GL_FRONT, GL_SHININESS, .4);
     glMaterialfv(GL_FRONT, GL_SPECULAR, yellow);
     glMaterialfv(GL_FRONT, GL_EMISSION, Emission);
     //  Bands of latitude
+    int inc = 15;
     for (int ph = -90; ph < 90; ph += inc)
     {
         glBegin(GL_QUAD_STRIP);

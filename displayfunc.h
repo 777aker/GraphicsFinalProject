@@ -17,12 +17,9 @@ void special(int key, int x, int y);
 void display();
 // initialize debug stuff
 void initdebug();
-// initialize our grid values?
-void initgrid();
 
 // --- variables ---
 //extern type name; then define in c
 extern int gensize;
-extern float ground[100][100];
 
 #endif
