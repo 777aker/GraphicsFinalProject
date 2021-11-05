@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 // GLEW _MUST_ be included first
 #ifdef USEGLEW
@@ -49,14 +50,21 @@
 #define Cos(x) (cos((x)*3.14159265/180))
 #define Sin(x) (sin((x)*3.14159265/180))
 
+// --- variables ---
+enum camera {
+	perspective,
+	orthogonal,
+	firstperson
+};
+extern bool debug;
+
+// --- functions ---
 // convenience functions from class
 void Print(const char* format , ...);
 void Fatal(const char* format , ...);
 unsigned int LoadTexBMP(const char* file);
-void Project(double fov,double asp,double dim);
+void Project(enum camera cp, double fov, double asp, double dim);
 void ErrCheck(const char* where);
 int  LoadOBJ(const char* file);
-
-
 
 #endif

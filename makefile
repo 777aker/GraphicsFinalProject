@@ -27,6 +27,7 @@ endif
 #dependencies
 glututility.o: glututility.c
 displayfunc.o: displayfunc.c
+perlin.o: perlin.c
 
 # Compile rules
 .c.o:
@@ -35,7 +36,7 @@ displayfunc.o: displayfunc.c
 	g++ -c $(CFLG)  $<
 
 # Link
-main:main.o glututility.o displayfunc.o
+main:main.o glututility.o displayfunc.o perlin.o
 	gcc $(CFLG) -o $@ $^ $(LIBS)
 
 # Clean

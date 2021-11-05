@@ -2,6 +2,7 @@
 #define DISPLAYFUNC_H
 
 #include "glututility.h"
+#include "perlin.h"
 
 // --- functions ---
 // do this when nothing else to do
@@ -14,15 +15,13 @@ void key(unsigned char ch, int x, int y);
 void special(int key, int x, int y);
 // do this a lot
 void display();
+// initialize debug stuff
+void initdebug();
+// initialize our grid values?
+void initgrid();
 
 // --- variables ---
-// aspect ratio
-extern double asp;
-// size of world
-extern double dim;
-// field of view
-extern int fov;
-// projection type
-extern int proj;
+//extern type name; then define in c
+
 
 #endif

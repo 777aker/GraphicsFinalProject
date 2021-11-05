@@ -19,6 +19,11 @@ int main(int argc, char* argv[]) {
 	glutIdleFunc(idle);
 
 	ErrCheck("init");
+	if (debug) {
+		initdebug();
+	}
+
+	initgrid();
 
 	glutMainLoop();
 	
