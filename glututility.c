@@ -1,7 +1,5 @@
 #include "glututility.h"
 
-
-
 // Below this line is all class stuff
 //----------------------------------------------------------------
 
