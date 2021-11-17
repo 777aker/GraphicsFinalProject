@@ -22,7 +22,7 @@ Perlin noise equation: https://gist.github.com/nowl/828013
 Procedural Generation Tutorial: https://www.youtube.com/watch?v=ZZY9YE7rZJw
 
 Requirements from proposal:
-- Precedurally generated forest with drastically different day night cycle.
+- Procedurally generated forest with drastically different day night cycle.
 - Walk in any direction forever and the scene will keep adding objects and terrain while removing far away objects and terrain.
 - Terrain change in elevation but player remain same height on ground.
 - AI that moves toward the player during the day and away from the player at night.
