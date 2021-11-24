@@ -54,13 +54,14 @@
 enum camera {
 	perspective,
 	orthogonal,
-	firstperson
+	firstperson,
+	numtypes
 };
 extern bool debug;
 
 // --- functions ---
 // convenience functions
-void doanormal(double one[3], double two[3], double three[3]);
+void doanormal(float one[3], float two[3], float three[3]);
 // convenience functions from class
 void Print(const char* format , ...);
 void Fatal(const char* format , ...);

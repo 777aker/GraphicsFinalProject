@@ -51,6 +51,9 @@ float noise2d(float x, float y)
 
 float perlin2d(float x, float y, float freq, int depth)
 {
+    x = abs(x);
+    y = abs(y);
+
     float xa = x * freq;
     float ya = y * freq;
     float amp = 1.0;

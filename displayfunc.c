@@ -3,7 +3,7 @@
 // aspect ratio
 double asp = 1;
 // size of world
-double dim = 3.0;
+double dim = 20.0;
 // field of view
 int fov = 55;
 // projection type
@@ -17,12 +17,17 @@ int gensize = 100;
 // sun stuff ---------------------------- light stuff
 //float Position[4];
 double zh = 0;
-int distance = 20;
+int distance = 120;
 int ylight = 0;
 int local = 0;
+bool movelight = true;
 // ----------------------------------
 // player position
 float playerpos[3] = { 0,0,0 };
+float playerangle = 0;
+// perlin stuff
+float pfreq = .2;
+float pdep = 1;
 
 void display() {
 	// erase the window and depth buffer
@@ -37,6 +42,8 @@ void display() {
 	glShadeModel(GL_SMOOTH);
 
 	switch (proj) {
+	default:
+		proj = perspective;
 	case perspective:
 		double Ex = -2 * dim * Sin(th) * Cos(ph);
 		double Ey = +2 * dim * Sin(ph);
@@ -48,7 +55,10 @@ void display() {
 		glRotatef(th, 0, 1, 0);
 		break;
 	case firstperson:
-
+		playerpos[1] = perlin2d(playerpos[0], playerpos[2], pfreq, pdep) + 1.5;
+		gluLookAt(0, playerpos[1], 0,
+			Cos(playerangle), playerpos[1], Sin(playerangle),
+			0, 1, 0);
 		break;
 	}
 
@@ -81,49 +91,44 @@ void display() {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
 	glLightfv(GL_LIGHT0, GL_POSITION, Position);
-	// lighting stuff ends ------------------------------------
+	// -------------------------------------------------------------
 
-	// draw our perlin ground
+	float xpos;
+	float zpos;
+
+	// green color for ground
 	glColor3f(.2, 1, .2);
-	// set material stuff
-
-	// disable cull face
-	glDisable(GL_CULL_FACE);
-
-	// lighting testing
-	/*
+	// material for objects
 	float white[] = { 1,1,1,1 };
 	float black[] = { 0,0,0,1 };
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, .2);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
-	glBegin(GL_QUADS);
-	glNormal3f(0, 1, 0);
-	glVertex3f(-50, 0, -50);
-	glVertex3f(-50, 0, 50);
-	glVertex3f(50, 0, 50);
-	glVertex3f(50, 0, -50);
-	glEnd();
-	*/
 
-	//---------------- perlin ground
+	// filling in the space square by square
 	int i, j;
-	float white[] = { 1,1,1,1 };
-	float black[] = { 0,0,0,1 };
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, .2);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
-	for (i = 0; i < gensize-1; i++) {
-		glBegin(GL_QUADS);
-		for (j = 0; j < gensize-1; j++) {
-			float y1 = perlin2d(i, j, .1, 4);
-			float y2 = perlin2d(i, j + 1, .1, 4);
-			float y3
-			glVertex3f(i - 50, ground[i][j], j - 50);
-			glVertex3f(i - 49, ground[i][j], j - 50);
-			glVertex3f()
+	for (i = -(gensize / 2); i < (gensize / 2) - 1; i++) {
+		for (j = -(gensize / 2); j < (gensize / 2) - 1; j++) {
+			// calculate the ground points
+			xpos = playerpos[0] + i;
+			zpos = playerpos[2] + j;
+			// we draw around 0, 0 bc that's simplest but we sample perlin
+			// as if we were moving around which gives the effect that we are moving
+			float pos1[3] = {i, perlin2d(xpos, zpos, pfreq, pdep), j };
+			float pos2[3] = {i + 1, perlin2d(xpos + 1, zpos, pfreq, pdep), j };
+			float pos3[3] = {i + 1, perlin2d(xpos + 1, zpos + 1, pfreq, pdep), j + 1 };
+			float pos4[3] = {i, perlin2d(xpos, zpos + 1, pfreq, pdep), j + 1 };
+			// draw the ground
+			glBegin(GL_QUADS);
+			// calculate the normal for the ground quads
+			doanormal(pos1, pos2, pos3);
+			// draw the ground
+			glVertex3f(pos1[0], pos1[1], pos1[2]);
+			glVertex3f(pos2[0], pos2[1], pos2[2]);
+			glVertex3f(pos3[0], pos3[1], pos3[2]);
+			glVertex3f(pos4[0], pos4[1], pos4[2]);
+			glEnd();
 		}
-		glEnd();
 	}
 
 	// disable lighting
@@ -141,15 +146,17 @@ void display() {
 }
 
 void initdebug() {
-	dim = 50.0;
-	proj = perspective;
+	//dim = 50.0;
+	//proj = perspective;
 }
 
 // called when nothing else to do
 void idle() {
-	//  Elapsed time in seconds
-	double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
-	zh = fmod(90 * t, 360.0);
+	if (movelight) {
+		//  Elapsed time in seconds
+		double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
+		zh = fmod(90 * t, 360.0);
+	}
 	// redisplay the scene
 	glutPostRedisplay();
 }
@@ -160,6 +167,38 @@ void key(unsigned char ch, int x, int y) {
 	// exit on ESC key
 	case 27:
 		exit(0);
+		break;
+	// movement stuff
+	case 'w':
+		playerpos[0] += Cos(playerangle);
+		playerpos[2] += Sin(playerangle);
+		break;
+	case 's':
+		playerpos[0] -= Cos(playerangle);
+		playerpos[2] -= Sin(playerangle);
+		break;
+	case 'a':
+		playerpos[0] -= Cos(playerangle + 90);
+		playerpos[2] -= Sin(playerangle + 90);
+		break;
+	case 'd':
+		playerpos[0] += Cos(playerangle + 90);
+		playerpos[2] += Sin(playerangle + 90);
+		break;
+	case 'e':
+		playerangle += 2;
+		break;
+	case 'q':
+		playerangle -= 2;
+		break;
+	// projection type
+	case 'p':
+		proj += 1 % numtypes;
+		break;
+	// whether or not to move the light
+	case '1':
+		movelight = !movelight;
+		break;
 	default:
 		break;
 	}
@@ -172,6 +211,7 @@ void key(unsigned char ch, int x, int y) {
 // called when special key is pressed
 void special(int key, int x, int y) {
 	switch (key) {
+	// move perspective and orthogonal camera around
 	case GLUT_KEY_RIGHT:
 		th += 5;
 		break;

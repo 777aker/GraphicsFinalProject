@@ -2,7 +2,7 @@
 
 bool debug = true;
 // from my hw6, calculates surface normals
-void doanormal(double one[3], double two[3], double three[3]) {
+void doanormal(float one[3], float two[3], float three[3]) {
     // this takes in 3 points then
     // sets the vector to point out
     // first, make a vector
