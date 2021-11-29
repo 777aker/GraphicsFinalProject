@@ -28,6 +28,8 @@ endif
 glututility.o: glututility.c
 displayfunc.o: displayfunc.c
 perlin.o: perlin.c
+lehmer.o: lehmer.c
+tree.o: tree.c
 
 # Compile rules
 .c.o:
@@ -36,7 +38,7 @@ perlin.o: perlin.c
 	g++ -c $(CFLG)  $<
 
 # Link
-main:main.o glututility.o displayfunc.o perlin.o
+main:main.o glututility.o displayfunc.o perlin.o lehmer.o tree.o
 	gcc $(CFLG) -o $@ $^ $(LIBS)
 
 # Clean

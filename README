@@ -4,18 +4,24 @@ Kelley Kelley
 CSCI 5229 Fall 2021
 
 Time Spent:
+oh, oops, forgot this was a thing
+Uh, maybe like +8 hours starting to track now
++ 4 hours
+How long was I supposed to spend on it by now?
 
 Key Bindings:
 Player Controls:
-
+wasd: move around
+eq: rotate view
 
 Light Controls:
-
+1: stops light from moving
 
 Grading/Debug Controls:
 ESC: exit on ESC key
 ArrowKeys: Move Camera around
 Page Up/Down: Zoom in/out
+p: change projection types (orthogonal blank)
 
 Credits:
 Perlin noise equation: https://gist.github.com/nowl/828013

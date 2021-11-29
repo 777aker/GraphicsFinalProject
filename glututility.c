@@ -1,6 +1,9 @@
 #include "glututility.h"
 
 bool debug = true;
+// define these for everything cause I'm sick of defining them
+float black[] = { 0,0,0,1 };
+float white[] = { 1,1,1,1 };
 // from my hw6, calculates surface normals
 void doanormal(float one[3], float two[3], float three[3]) {
     // this takes in 3 points then
@@ -30,6 +33,18 @@ void doanormal(float one[3], float two[3], float three[3]) {
     // then, set normal
     // mmm, math makes things so much easier
     glNormal3f(normal[x], normal[y], normal[z]);
+}
+
+// from my hw6 just convenience for colors cause I like rgb
+// I forgot the openGL method and this is easier
+// than finding it
+void Color(float r, float g, float b) {
+    glColor3f(r / 255, g / 255, b / 255);
+}
+
+// from my hw6 do a cylinder type thing
+void Vertexflat(float thet, float height, float distance) {
+    glVertex3f(Sin(thet)*distance, height, Cos(thet)*distance);
 }
 
 // Below this line is all class stuff

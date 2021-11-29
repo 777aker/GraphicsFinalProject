@@ -3,6 +3,8 @@
 
 #include "glututility.h"
 #include "perlin.h"
+#include "lehmer.h"
+#include "tree.h"
 
 // --- functions ---
 // do this when nothing else to do

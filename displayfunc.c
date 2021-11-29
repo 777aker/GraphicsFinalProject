@@ -13,7 +13,7 @@ int th = 40;
 // elevation of view angle
 int ph = 15;
 // terrain stuff
-int gensize = 100;
+int gensize = 200;
 // sun stuff ---------------------------- light stuff
 //float Position[4];
 double zh = 0;
@@ -23,6 +23,7 @@ int local = 0;
 bool movelight = true;
 // ----------------------------------
 // player position
+// random start so new world each time
 float playerpos[3] = { 0,0,0 };
 float playerangle = 0;
 // perlin stuff
@@ -97,13 +98,19 @@ void display() {
 	float zpos;
 
 	// green color for ground
-	glColor3f(.2, 1, .2);
-	// material for objects
-	float white[] = { 1,1,1,1 };
-	float black[] = { 0,0,0,1 };
+	//glColor3f(.2, 1, .2);
+	// old material for objects
+	/*
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, .2);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
+	*/
+	// new material for objects
+	// setting one for all of them bc they all have roughly the same material in world gen
+	float spec[] = { 1,6,1,1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1 / 20);
 
 	// filling in the space square by square
 	int i, j;
@@ -118,6 +125,8 @@ void display() {
 			float pos2[3] = {i + 1, perlin2d(xpos + 1, zpos, pfreq, pdep), j };
 			float pos3[3] = {i + 1, perlin2d(xpos + 1, zpos + 1, pfreq, pdep), j + 1 };
 			float pos4[3] = {i, perlin2d(xpos, zpos + 1, pfreq, pdep), j + 1 };
+			// color for the ground
+			glColor3f(.2, 1, .2);
 			// draw the ground
 			glBegin(GL_QUADS);
 			// calculate the normal for the ground quads
@@ -128,6 +137,23 @@ void display() {
 			glVertex3f(pos3[0], pos3[1], pos3[2]);
 			glVertex3f(pos4[0], pos4[1], pos4[2]);
 			glEnd();
+			// now it's time to populate this ground with some objects
+			// first set our location for consistent generation based on position
+			nLehmer = (int)zpos << 16 | (int)xpos;
+			// some testing
+			//printf("%d\n", Lehmer32() % 256);
+			/*
+			if (Lehmer32() % 256 < 32) {
+				printf("point is true");
+			}
+			else {
+				printf("point is false");
+			}
+			*/
+			// draw a tree based on what lehmer got
+			if (Lehmer32() % 256 < 32) {
+				tree(i, pos1[1], j);
+			}
 		}
 	}
 
@@ -135,9 +161,11 @@ void display() {
 	glDisable(GL_LIGHTING);
 	// draw some information to screen for debugging
 	if (debug) {
+		/* I don't need this info anymore
 		glColor3f(1, 1, 1);
 		glWindowPos2i(5, 5);
 		Print("th = %d, ph = %d, dim = %f", th, ph, dim);
+		*/
 	}
 
 	ErrCheck("display");
@@ -145,9 +173,13 @@ void display() {
 	glutSwapBuffers();
 }
 
+// originally for initializing debug stuff buuutttt
+// it's set up nicely so I'm just going to use it
+// for intializing everything
 void initdebug() {
-	//dim = 50.0;
-	//proj = perspective;
+	nLehmer = rand() % 256;
+	playerpos[0] = Lehmer32() % 5000;
+	playerpos[2] = Lehmer32() % 5000;
 }
 
 // called when nothing else to do

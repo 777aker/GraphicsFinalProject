@@ -58,10 +58,16 @@ enum camera {
 	numtypes
 };
 extern bool debug;
+// ok, if I have to make these one more time imma explode so
+// defining them here as global variables
+extern float black[4];
+extern float white[4];
 
 // --- functions ---
 // convenience functions
 void doanormal(float one[3], float two[3], float three[3]);
+void Color(float r, float g, float b);
+void Vertexflat(float thet, float height, float distance);
 // convenience functions from class
 void Print(const char* format , ...);
 void Fatal(const char* format , ...);
