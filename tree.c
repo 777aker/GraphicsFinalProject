@@ -43,6 +43,23 @@ void Pmult(double M[4][4], Point v[4], Point r[4])
 	}
 }
 
+Point bezier(Point p0, Point p1, Point p2, Point p3, float t) {
+	Point bez;
+	bez.x = pow(1 - t, 3) * p0.x 
+		+ 3 * pow(1 - t, 2) * t * p1.x 
+		+ 3 * (1 - t) * pow(t, 2) * p2.x 
+		+ pow(t, 3) * p3.x;
+	bez.y = pow(1 - t, 3) * p0.y 
+		+ 3 * pow(1 - t, 2) * t * p1.y 
+		+ 3 * (1 - t) * pow(t, 2) * p2.y 
+		+ pow(t, 3) * p3.y;
+	bez.z = pow(1 - t, 3) * p0.z
+		+ 3 * pow(1 - t, 2) * t * p1.z
+		+ 3 * (1 - t) * pow(t, 2) * p2.z
+		+ pow(t, 3) * p3.z;
+	return bez;
+}
+
 // draw a tree
 // I could've just copied from my previous hw, but 
 // regretably I didn't and spent way too much time on this
@@ -72,52 +89,11 @@ void tree(int x, int y, int z) {
 	branch(1, 5);
 	branch(1, 5);
 
-	// set n to how many points we have
-	//n -= 1;
-	
-	// draw the centers of our tree
-	/*
-	glBegin(GL_LINES);
-	for (int i = n; i >= 0; i--) {
-		glVertex3f(controls[i].x, controls[i].y, controls[i].z);
-		glVertex3f(controls[parents[i]].x, controls[parents[i]].y, controls[parents[i]].z);
-	}
-	glEnd();
-	*/
-	//pn -= 1;
-	/*
-	glBegin(GL_LINE_STRIP);
-	for (int i = 0; i < pn; i++) {
-		glVertex3f(P[i].x, P[i].y, P[i].z);
-	}
-	glEnd();
-	*/
-	
-	/*
-	for (int j = 0; j < nleaves; j++) {
-		//printf("%i=%i\n", j, leaves[j]);
-		
-		glBegin(GL_LINE_STRIP);
-		for (int i = leaves[j]; i > 0; i = parents[i]) {
-			glVertex3f(controls[i].x, controls[i].y, controls[i].z);
-		}
-		glVertex3f(controls[0].x, controls[0].y, controls[0].z);
-		glEnd();
-		
-	}
-	*/
-
-	/*
-	glBegin(GL_POINTS);
-	for (int j = 0; j < n; j++) {
-		glVertex3f(controls[j].x, controls[j].y, controls[j].z);
-		printf("point={%f,%f,%f}, parent=%i\n", controls[j].x, controls[j].y, controls[j].z, parents[j]);
-	}
-	glEnd();
-	*/
-
+	// making our bezier curve
 	glEnable(GL_MAP1_VERTEX_3);
+	//glEnable(GL_MAP1_NORMAL);
 
+	/*
 	for (int j = 0; j < nleaves; j++) {
 		Point P[4];
 		int pn = 0;
@@ -143,6 +119,37 @@ void tree(int x, int y, int z) {
 		glMapGrid1f(m, 0.0, 1.0);
 		glEvalMesh1(GL_LINE, 0, m);
 	}
+	*/
+
+	for (int j = 0; j < nleaves; j++) {
+		Point P[4];
+		int pn = 0;
+		for (int i = leaves[j]; i > 0; i = parents[i]) {
+			P[pn].x = controls[i].x;
+			P[pn].y = controls[i].y;
+			P[pn].z = controls[i].z;
+			pn += 1;
+		}
+
+		int m = 10;
+		glColor3f(1, 1, 0);
+		glPointSize(3);
+		//printf("------------------------------\n");
+		//printf("%f,%f,%f\n", P[0].x, P[0].y, P[0].z);
+		//printf("%f,%f,%f\n", P[1].x, P[1].y, P[1].z);
+		//printf("%f,%f,%f\n", P[2].x, P[2].y, P[2].z);
+		//printf("%f,%f,%f\n", P[3].x, P[3].y, P[3].z);
+		//printf("+++++++++++++++++++++++++\n");
+		glBegin(GL_LINE_STRIP);
+		for (int k = 0; k <= m; k++) {
+			//printf("%f", (float)(k) / (float)(m));
+			Point bezpt = bezier(P[0], P[1], P[2], P[3], (float)(k) / (float)(m));
+			//printf("%f,%f,%f\n", bezpt.x, bezpt.y, bezpt.z);
+			glVertex3f(bezpt.x, bezpt.y, bezpt.z);
+		}
+		glVertex3f(controls[0].x, controls[0].y, controls[0].z);
+		glEnd();
+	}
 
 	// we are done put it back
 	glPopMatrix();
@@ -165,7 +172,7 @@ void branch(int parent, int iterations) {
 	int thisparent = n;
 	n += 1;
 
-	if (iterations - 1 <= 2) {
+	if (iterations - 1 <= 1) {
 		leaves[nleaves] = n-1;
 		nleaves += 1;
 		return;
