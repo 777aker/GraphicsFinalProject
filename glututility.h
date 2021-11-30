@@ -9,6 +9,8 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+#include "lehmer.h"
+
 // GLEW _MUST_ be included first
 #ifdef USEGLEW
 #include <GL/glew.h>

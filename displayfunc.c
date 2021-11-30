@@ -32,14 +32,93 @@ float pdep = 1;
 
 void display() {
 	// erase the window and depth buffer
-	glClearColor(0.06, .92, .89, .5);
+	// background color
+	float bg[4] = { 0.06, .92, .89, .5 };
+	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// enable z buffering
 	glEnable(GL_DEPTH_TEST);
 	// undo previous displays
 	glLoadIdentity();
 
-	// shade model ------------- light
+	// make sure we normalize vectors
+	glEnable(GL_NORMALIZE);
+
+	// do the light stuff
+	light();
+
+	// fog bc fog cool
+	glEnable(GL_FOG);
+	glFogf(GL_FOG_MODE, GL_EXP);
+	glFogfv(GL_FOG_COLOR, bg);
+	glFogf(GL_FOG_DENSITY, .02);
+
+	// for keeping track of ground points
+	// out here so in for loop don't have to keep allocating memory
+	float xpos;
+	float zpos;
+	// material for objects
+	// setting one for all of them bc they all have roughly the same material in world gen
+	float spec[] = { 1,6,1,1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1 / 20);
+
+	// filling in the space square by square
+	int i, j;
+	for (i = -(gensize / 2); i < (gensize / 2) - 1; i++) {
+		for (j = -(gensize / 2); j < (gensize / 2) - 1; j++) {
+			// calculate the ground points
+			xpos = playerpos[0] + i;
+			zpos = playerpos[2] + j;
+			// we draw around 0, 0 bc that's simplest but we sample perlin
+			// as if we were moving around which gives the effect that we are moving
+			// 2 perlin noises on top of each other look much better than 1
+			float pos1[3] = {i, perlin2d(xpos, zpos, pfreq, pdep) + perlin2d(xpos, zpos, pfreq/5, pdep*4), j };
+			float pos2[3] = {i + 1, perlin2d(xpos + 1, zpos, pfreq, pdep) + perlin2d(xpos + 1, zpos, pfreq/5, pdep*4), j };
+			float pos3[3] = {i + 1, perlin2d(xpos + 1, zpos + 1, pfreq, pdep) + perlin2d(xpos + 1, zpos + 1, pfreq/5, pdep*4), j + 1 };
+			float pos4[3] = {i, perlin2d(xpos, zpos + 1, pfreq, pdep) + perlin2d(xpos, zpos + 1, pfreq/5, pdep*4), j + 1 };
+			// color for the ground
+			glColor3f(.2, 1, .2);
+			// draw the ground
+			glBegin(GL_QUADS);
+			// calculate the normal for the ground quads
+			doanormal(pos1, pos2, pos3);
+			// draw the ground
+			glVertex3f(pos1[0], pos1[1], pos1[2]);
+			glVertex3f(pos2[0], pos2[1], pos2[2]);
+			glVertex3f(pos3[0], pos3[1], pos3[2]);
+			glVertex3f(pos4[0], pos4[1], pos4[2]);
+			glEnd();
+			// now it's time to populate this ground with some objects
+			// first set our location for consistent generation based on position
+			nLehmer = (int)zpos << 16 | (int)xpos;
+			// draw a tree based on what lehmer got
+			if (Lehmer32() % 256 < 10) {
+				tree(i, pos1[1], j);
+			}
+		}
+	}
+
+	// disable lighting
+	glDisable(GL_LIGHTING);
+	// draw some information to screen for debugging
+	if (debug) {
+		/* I don't need this info anymore
+		glColor3f(1, 1, 1);
+		glWindowPos2i(5, 5);
+		Print("th = %d, ph = %d, dim = %f", th, ph, dim);
+		*/
+	}
+
+	ErrCheck("display");
+	glFlush();
+	glutSwapBuffers();
+}
+
+// do the lighting stuff
+void light() {
+	// shade model ------------- light stuff -------------
 	glShadeModel(GL_SMOOTH);
 
 	switch (proj) {
@@ -56,7 +135,7 @@ void display() {
 		glRotatef(th, 0, 1, 0);
 		break;
 	case firstperson:
-		playerpos[1] = perlin2d(playerpos[0], playerpos[2], pfreq, pdep) + 1.5;
+		playerpos[1] = perlin2d(playerpos[0], playerpos[2], pfreq, pdep) + perlin2d(playerpos[0], playerpos[2], pfreq / 5, pdep * 4) + 1.5;
 		gluLookAt(0, playerpos[1], 0,
 			Cos(playerangle), playerpos[1], Sin(playerangle),
 			0, 1, 0);
@@ -92,85 +171,7 @@ void display() {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
 	glLightfv(GL_LIGHT0, GL_POSITION, Position);
-	// -------------------------------------------------------------
-
-	float xpos;
-	float zpos;
-
-	// green color for ground
-	//glColor3f(.2, 1, .2);
-	// old material for objects
-	/*
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, .2);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
-	*/
-	// new material for objects
-	// setting one for all of them bc they all have roughly the same material in world gen
-	float spec[] = { 1,6,1,1 };
-	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1 / 20);
-
-	// filling in the space square by square
-	int i, j;
-	for (i = -(gensize / 2); i < (gensize / 2) - 1; i++) {
-		for (j = -(gensize / 2); j < (gensize / 2) - 1; j++) {
-			// calculate the ground points
-			xpos = playerpos[0] + i;
-			zpos = playerpos[2] + j;
-			// we draw around 0, 0 bc that's simplest but we sample perlin
-			// as if we were moving around which gives the effect that we are moving
-			float pos1[3] = {i, perlin2d(xpos, zpos, pfreq, pdep), j };
-			float pos2[3] = {i + 1, perlin2d(xpos + 1, zpos, pfreq, pdep), j };
-			float pos3[3] = {i + 1, perlin2d(xpos + 1, zpos + 1, pfreq, pdep), j + 1 };
-			float pos4[3] = {i, perlin2d(xpos, zpos + 1, pfreq, pdep), j + 1 };
-			// color for the ground
-			glColor3f(.2, 1, .2);
-			// draw the ground
-			glBegin(GL_QUADS);
-			// calculate the normal for the ground quads
-			doanormal(pos1, pos2, pos3);
-			// draw the ground
-			glVertex3f(pos1[0], pos1[1], pos1[2]);
-			glVertex3f(pos2[0], pos2[1], pos2[2]);
-			glVertex3f(pos3[0], pos3[1], pos3[2]);
-			glVertex3f(pos4[0], pos4[1], pos4[2]);
-			glEnd();
-			// now it's time to populate this ground with some objects
-			// first set our location for consistent generation based on position
-			nLehmer = (int)zpos << 16 | (int)xpos;
-			// some testing
-			//printf("%d\n", Lehmer32() % 256);
-			/*
-			if (Lehmer32() % 256 < 32) {
-				printf("point is true");
-			}
-			else {
-				printf("point is false");
-			}
-			*/
-			// draw a tree based on what lehmer got
-			if (Lehmer32() % 256 < 32) {
-				tree(i, pos1[1], j);
-			}
-		}
-	}
-
-	// disable lighting
-	glDisable(GL_LIGHTING);
-	// draw some information to screen for debugging
-	if (debug) {
-		/* I don't need this info anymore
-		glColor3f(1, 1, 1);
-		glWindowPos2i(5, 5);
-		Print("th = %d, ph = %d, dim = %f", th, ph, dim);
-		*/
-	}
-
-	ErrCheck("display");
-	glFlush();
-	glutSwapBuffers();
+	// ------------------------------------------------------------- light stuff end
 }
 
 // originally for initializing debug stuff buuutttt

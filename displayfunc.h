@@ -3,7 +3,6 @@
 
 #include "glututility.h"
 #include "perlin.h"
-#include "lehmer.h"
 #include "tree.h"
 
 // --- functions ---
@@ -19,6 +18,8 @@ void special(int key, int x, int y);
 void display();
 // initialize debug stuff
 void initdebug();
+// do the lighting stuff
+void light();
 
 // --- variables ---
 //extern type name; then define in c
