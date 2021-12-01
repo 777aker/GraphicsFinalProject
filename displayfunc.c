@@ -94,7 +94,7 @@ void display() {
 			// first set our location for consistent generation based on position
 			nLehmer = (int)zpos << 16 | (int)xpos;
 			// draw a tree based on what lehmer got
-			if (Lehmer32() % 256 < 10) {
+			if (Lehmer32() % 256 < 2) {
 				tree(i, pos1[1], j);
 			}
 		}

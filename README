@@ -13,17 +13,32 @@ then them since I generate infinite more objects and space
 that's how that works right????
 
 What I mean by bezier curve trees: each tree is multiple bezier curves
-generated using Lehmer random values
+first I generate a set of points that represent the trees control points
+then I build sets of control points based on those
+then I make them into a bezier curve
+then I take the derivative of that to build a normal vector so I can
+thicken the tree
+
+What I need to do is listed way below, but honestly I may just end up
+making the trees more efficient and prettier bc I don't wanna do the other
+stuff just want to make the perfect trees forever...but if you tell me do the
+other stuff I guess I'll do them instead of these dumb trees that I've definitely
+spent way way too long on
 
 Time Spent:
 oh, oops, forgot this was a thing
-Uh, maybe like + 8 hours starting to track now
+Uh, maybe like + 14 ish hours 
+starting to track now
 + 4 hours
 How long was I supposed to spend on it by now?
 + 12 hours (yes I sat down and worked on this for 12 hours straight....
 it was a bad idea and I got nothing done just really confused)
 + 6 hrs
-so 30 ish give or take 30
++ 4 hrs
+so 40 ish hrs give or take 40
+(I put way too many hours into trees (did like 10 different methods))
+(plus bezier took me way too long to wrap my head around)
+(this is problamatic I don't think I'm getting an A)
 
 Key Bindings
 Player Controls:
@@ -47,6 +62,7 @@ Done Requirements from proposal:
 - Walk in any direction forever and the scene will keep adding objects and terrain while removing far away objects and terrain.
 - Procedurally generated forest
 - Terrain change in elevation but player remain same height on ground
+
 Need to do.....dang.....yea that's all not getting done oops
 spent way too long on just niiiiccceeeee trees
 - drastically different day night cycle.
