@@ -3,6 +3,8 @@ Final Project
 Kelley Kelley
 CSCI 5229 Fall 2021
 
+Run: classic make then ./main
+
 What you should do: hold down w
 (if you rotate with eq then move around it is a little jumpy
 due to how I round the position)
@@ -24,6 +26,8 @@ making the trees more efficient and prettier bc I don't wanna do the other
 stuff just want to make the perfect trees forever...but if you tell me do the
 other stuff I guess I'll do them instead of these dumb trees that I've definitely
 spent way way too long on
+(make them prettier by messing with parameters, making them more efficient so 
+I can draw more, adding leaves)
 
 Time Spent:
 oh, oops, forgot this was a thing
