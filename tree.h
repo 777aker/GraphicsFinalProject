@@ -14,7 +14,7 @@ struct point {
 // makes a tree
 void tree(int x, int y, int z);
 // draw the branches to a tree
-// a recursive function that draws until they are too thin
+// a recursive function that makes a few control points for tree branches
 void branch(int parent, int iterations);
 // the leaf generator that generates leaves at the end of a branch
 

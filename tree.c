@@ -78,6 +78,25 @@ Point negative(Point p0) {
 	return neg;
 }
 
+// multiply a vector
+Point mult(Point p0, float scale) {
+	Point cp;
+	cp.x = p0.x * scale;
+	cp.y = p0.y * scale;
+	cp.z = p0.z * scale;
+	return cp;
+}
+
+// do a normal off a point so I don't type so much
+void glnormalpoint(Point p0) {
+	glNormal3f(p0.x, p0.y, p0.z);
+}
+
+// also do a vertex off two points because that's a lot of typing too
+void glvertex2points(Point p0, Point p1) {
+	glVertex3f(p0.x + p1.x, p0.y + p1.y, p0.z + p1.z);
+}
+
 // draw a tree
 // I could've just copied from my previous hw, but 
 // regretably I didn't and spent way too much time on this
@@ -97,27 +116,11 @@ void tree(int x, int y, int z) {
 	struct point bottom = { x,y,z };
 	struct point top = { x,y + height,z };
 	controls[0] = bottom;
-	parents[0] = 0;
+	parents[0] = -1; 
 	controls[1] = top;
 	parents[1] = 0;
 	n = 2;
 	nleaves = 0;
-	/*
-	glTranslatef(x, y, z);
-	int i;
-	glBegin(GL_QUADS);
-	for (i = 360; i >= 0; i -= 60) {
-		// normal
-		glNormal3f(Sin(i - 30), 0, Cos(i - 30));
-		// points
-		Vertexflat(i, 0, width);
-		Vertexflat(i, height, width);
-		Vertexflat(i - 60, height, width);
-		Vertexflat(i - 60, 0, width);
-	}
-	glEnd();
-	glPopMatrix();
-	*/
 
 	// recursive functions that will populate our other branches
 	branch(1, 5);
@@ -128,102 +131,114 @@ void tree(int x, int y, int z) {
 		// first make our control points
 		Point P[4];
 		int pn = 0;
-		for (int i = leaves[j]; i > 0; i = parents[i]) {
+		// travel from a leaf up its parents till you reach the base to build the tree
+		for (int i = leaves[j]; i >= 0; i = parents[i]) {
 			P[pn].x = controls[i].x;
 			P[pn].y = controls[i].y;
 			P[pn].z = controls[i].z;
 			pn += 1;
 		}
-		P[pn].x = controls[0].x;
-		P[pn].y = controls[0].y;
-		P[pn].z = controls[0].z;
-		pn += 1;
 		// store the bezier points
 		Point bezpts[11];
 		// evaluate our control points
 		int m = 10;
 		glColor3f(1, 1, 0);
-		//glPointSize(3);
-		//glBegin(GL_LINE_STRIP);
+		// also store the offset vectors for the points
 		Point offset1[11];
 		Point offset2[11];
 		Point offset3[11];
 		Point offset4[11];
 		for (int k = 0; k <= m; k++) {
+			// calculate our beziers
 			bezpts[k] = bezier(P[0], P[1], P[2], P[3], (float)(k) / (float)(m));
 			Point v1 = bezierdt(P[0], P[1], P[2], P[3], (float)(k) / (float)(m));
-			offset1[k] = cross(x1, v1);
-			offset2[k] = cross(offset1[k], v1);
-			offset3[k] = negative(offset1[k]);
+			// first cross product with x unit vector so we can get a normal
+			// since it is unit vector x everytime we can simplify the cross product greatly
+			Point cp;
+			cp.x = 0;
+			cp.y = v1.z;
+			cp.z = v1.y;
+			// normalize it
+			float magnitude = pow(pow(cp.y, 2) + pow(cp.z, 2), .5);
+			cp.y /= magnitude;
+			cp.z /= magnitude;
+			// build our four normals to the current point so we can make a thick tree
+			offset1[k] = cp;
+			offset2[k] = cross(cp, v1);
+			offset3[k] = negative(cp);
 			offset4[k] = negative(offset2[k]);
+			// do our width here instead of being dumb and overly complicated later
+			// varying width because want it to get thinner as you go up the tree
+			float curwidth = width * pow(k + 1, .5) / 3;
+			offset1[k] = mult(offset1[k], curwidth);
+			offset2[k] = mult(offset2[k], curwidth);
+			offset3[k] = mult(offset3[k], curwidth);
+			offset4[k] = mult(offset4[k], curwidth);
 		}
+
+		// now we gonna draw some boys
 		glColor3f(.8, .5, .4);
 		glEnable(GL_CULL_FACE);
 		glBegin(GL_QUADS);
 		for (int k = 0; k < m; k++) {
-			float tmpwidth = width * pow(k , .5) / 3;
-			float one1[3] = { offset1[k].x,offset1[k].y,offset1[k].z };
-			float two1[3] = { offset1[k+1].x,offset1[k+1].y,offset1[k+1].z };
-			float three1[3] = { offset2[k + 1].x,offset2[k + 1].y,offset2[k + 1].z };
-			doanormal(one1, two1, three1);
 
-			glVertex3f(bezpts[k].x + offset1[k].x * tmpwidth, bezpts[k].y + offset1[k].y * tmpwidth, bezpts[k].z + offset1[k].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset1[k + 1].x * tmpwidth, bezpts[k + 1].y + offset1[k + 1].y * tmpwidth, bezpts[k + 1].z + offset1[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset2[k + 1].x * tmpwidth, bezpts[k + 1].y + offset2[k + 1].y * tmpwidth, bezpts[k + 1].z + offset2[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k].x + offset2[k].x * tmpwidth, bezpts[k].y + offset2[k].y * tmpwidth, bezpts[k].z + offset2[k].z * tmpwidth);
+			// fun fact, our normals are our offsets bc I'm cool like that
+			// first quad
+			glnormalpoint(offset1[k]);
+			glvertex2points(bezpts[k], offset1[k]);
 
-			float one2[3] = { offset2[k].x,offset2[k].y,offset2[k].z };
-			float two2[3] = { offset2[k + 1].x,offset2[k + 1].y,offset2[k + 1].z };
-			float three2[3] = { offset3[k + 1].x,offset3[k + 1].y,offset3[k + 1].z };
-			doanormal(one2, two2, three2);
+			glnormalpoint(offset1[k + 1]);
+			glvertex2points(bezpts[k + 1], offset1[k + 1]);
 
-			glVertex3f(bezpts[k].x + offset2[k].x * tmpwidth, bezpts[k].y + offset2[k].y * tmpwidth, bezpts[k].z + offset2[k].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset2[k + 1].x * tmpwidth, bezpts[k + 1].y + offset2[k + 1].y * tmpwidth, bezpts[k + 1].z + offset2[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset3[k + 1].x * tmpwidth, bezpts[k + 1].y + offset3[k + 1].y * tmpwidth, bezpts[k + 1].z + offset3[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k].x + offset3[k].x * tmpwidth, bezpts[k].y + offset3[k].y * tmpwidth, bezpts[k].z + offset3[k].z * tmpwidth);
+			glnormalpoint(offset2[k + 1]);
+			glvertex2points(bezpts[k + 1], offset2[k + 1]);
 
-			float one3[3] = { offset3[k].x,offset3[k].y,offset3[k].z };
-			float two3[3] = { offset3[k + 1].x,offset3[k + 1].y,offset3[k + 1].z };
-			float three3[3] = { offset4[k + 1].x,offset4[k + 1].y,offset4[k + 1].z };
-			doanormal(one3, two3, three3);
+			glnormalpoint(offset2[k]);
+			glvertex2points(bezpts[k], offset2[k]);
 
-			glVertex3f(bezpts[k].x + offset3[k].x * tmpwidth, bezpts[k].y + offset3[k].y * tmpwidth, bezpts[k].z + offset3[k].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset3[k + 1].x * tmpwidth, bezpts[k + 1].y + offset3[k + 1].y * tmpwidth, bezpts[k + 1].z + offset3[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset4[k + 1].x * tmpwidth, bezpts[k + 1].y + offset4[k + 1].y * tmpwidth, bezpts[k + 1].z + offset4[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k].x + offset4[k].x * tmpwidth, bezpts[k].y + offset4[k].y * tmpwidth, bezpts[k].z + offset4[k].z * tmpwidth);
+			// second quad
+			glnormalpoint(offset2[k]);
+			glvertex2points(bezpts[k], offset2[k]);
 
-			float one4[3] = { offset4[k].x,offset4[k].y,offset4[k].z };
-			float two4[3] = { offset4[k + 1].x,offset4[k + 1].y,offset4[k + 1].z };
-			float three4[3] = { offset1[k + 1].x,offset1[k + 1].y,offset1[k + 1].z };
-			doanormal(one4, two4, three4);
+			glnormalpoint(offset2[k + 1]);
+			glvertex2points(bezpts[k + 1], offset2[k + 1]);
 
-			glVertex3f(bezpts[k].x + offset4[k].x * tmpwidth, bezpts[k].y + offset4[k].y * tmpwidth, bezpts[k].z + offset4[k].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset4[k + 1].x * tmpwidth, bezpts[k + 1].y + offset4[k + 1].y * tmpwidth, bezpts[k + 1].z + offset4[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k + 1].x + offset1[k + 1].x * tmpwidth, bezpts[k + 1].y + offset1[k + 1].y * tmpwidth, bezpts[k + 1].z + offset1[k + 1].z * tmpwidth);
-			glVertex3f(bezpts[k].x + offset1[k].x * tmpwidth, bezpts[k].y + offset1[k].y * tmpwidth, bezpts[k].z + offset1[k].z * tmpwidth);
+			glnormalpoint(offset3[k + 1]);
+			glvertex2points(bezpts[k + 1], offset3[k + 1]);
+
+			glnormalpoint(offset3[k]);
+			glvertex2points(bezpts[k], offset3[k]);
+
+			// thrid quad
+			glnormalpoint(offset3[k]);
+			glvertex2points(bezpts[k], offset3[k]);
 			
+			glnormalpoint(offset3[k + 1]);
+			glvertex2points(bezpts[k + 1], offset3[k + 1]);
+
+			glnormalpoint(offset4[k + 1]);
+			glvertex2points(bezpts[k + 1], offset4[k + 1]);
+
+			glnormalpoint(offset4[k]);
+			glvertex2points(bezpts[k], offset4[k]);
+
+			// forth quad
+			glnormalpoint(offset4[k]);
+			glvertex2points(bezpts[k], offset4[k]);
+
+			glnormalpoint(offset4[k + 1]);
+			glvertex2points(bezpts[k + 1], offset4[k + 1]);
+
+			// dang, should've done normal and points together in a function oh well
+			glnormalpoint(offset1[k + 1]);
+			glvertex2points(bezpts[k + 1], offset1[k + 1]);
+
+			glnormalpoint(offset1[k]);
+			glvertex2points(bezpts[k], offset1[k]);
 		}
 		glEnd();
 		glDisable(GL_CULL_FACE);
 		
-		/*
-		glBegin(GL_LINE_STRIP);
-		for (int k = 0; k <= m; k++) {
-			glVertex3f(bezpts[k].x, bezpts[k].y, bezpts[k].z);
-		}
-		glEnd();
-		for (int k = 0; k <= m; k++) {
-			glBegin(GL_LINES);
-			glVertex3f(bezpts[k].x, bezpts[k].y, bezpts[k].z);
-			glVertex3f(bezpts[k].x + offset1[k].x * width, bezpts[k].y + offset1[k].y * width, bezpts[k].z + offset1[k].z * width);
-			glVertex3f(bezpts[k].x, bezpts[k].y, bezpts[k].z);
-			glVertex3f(bezpts[k].x + offset2[k].x * width, bezpts[k].y + offset2[k].y * width, bezpts[k].z + offset2[k].z * width);
-			glEnd();
-		}
-		*/
-		
-		//glVertex3f(controls[0].x, controls[0].y, controls[0].z);
-		//glEnd();
 	}
 
 	// we are done put it back
@@ -242,11 +257,14 @@ void branch(int parent, int iterations) {
 	tmppoint.y += (1 + ((float)(Lehmer32() % 10)-4)/10) * ratio * (1 + iterations/10);
 	tmppoint.z += negz;
 	
+	// add this new control point to controls and also
+	// set who it's parent is
 	controls[n] = tmppoint;
 	parents[n] = parent;
 	int thisparent = n;
 	n += 1;
 
+	// if this is our last iteration then put it in leaves array
 	if (iterations - 1 <= 2) {
 		leaves[nleaves] = n-1;
 		nleaves += 1;

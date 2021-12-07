@@ -51,6 +51,10 @@ float noise2d(float x, float y)
 
 float perlin2d(float x, float y, float freq, int depth)
 {
+    // I had to add this because their code broke with negatives
+    // so if you went to 0,0 it would mirror but since it's
+    // perlin it's hard to tell and the odds of being able to find
+    // 0,0 after starting in a random location with no shown coordinates is unlikely
     x = abs(x);
     y = abs(y);
 
@@ -73,7 +77,7 @@ float perlin2d(float x, float y, float freq, int depth)
     return fin / div;
 }
 
-/*
+/* took this out of their code
 int
 main(int argc, char* argv[])
 {

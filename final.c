@@ -1,5 +1,6 @@
-#include "main.h"
+#include "final.h"
 
+// this file isn't very interesting. displayfunc.c is where things really are
 int main(int argc, char* argv[]) {
 
 	// initialize GLUT
@@ -23,6 +24,7 @@ int main(int argc, char* argv[]) {
 		initdebug();
 	}
 
+	// start
 	glutMainLoop();
 	
 	return 0;

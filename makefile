@@ -1,5 +1,5 @@
 # final project: Kelley Kelley
-EXE=main
+EXE=final
 
 # Main target
 all: $(EXE)
@@ -38,7 +38,7 @@ tree.o: tree.c
 	g++ -c $(CFLG)  $<
 
 # Link
-main:main.o glututility.o displayfunc.o perlin.o lehmer.o tree.o
+final:final.o glututility.o displayfunc.o perlin.o lehmer.o tree.o
 	gcc $(CFLG) -o $@ $^ $(LIBS)
 
 # Clean

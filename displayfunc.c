@@ -16,11 +16,12 @@ int ph = 15;
 int gensize = 200;
 // sun stuff ---------------------------- light stuff
 //float Position[4];
-double zh = 0;
-int distance = 120;
+double zh = 180;
+int distance = 100;
 int ylight = 0;
 int local = 0;
 bool movelight = true;
+float bg[4] = { 0.06, .92, .89, .5 };
 // ----------------------------------
 // player position
 // random start so new world each time
@@ -33,7 +34,6 @@ float pdep = 1;
 void display() {
 	// erase the window and depth buffer
 	// background color
-	float bg[4] = { 0.06, .92, .89, .5 };
 	glClearColor(bg[0], bg[1], bg[2], bg[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// enable z buffering
@@ -47,12 +47,6 @@ void display() {
 	// do the light stuff
 	light();
 
-	// fog bc fog cool
-	glEnable(GL_FOG);
-	glFogf(GL_FOG_MODE, GL_EXP);
-	glFogfv(GL_FOG_COLOR, bg);
-	glFogf(GL_FOG_DENSITY, .02);
-
 	// for keeping track of ground points
 	// out here so in for loop don't have to keep allocating memory
 	float xpos;
@@ -65,7 +59,7 @@ void display() {
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1 / 20);
 
 	// filling in the space square by square
-	int i, j;
+	float i, j;
 	for (i = -(gensize / 2); i < (gensize / 2) - 1; i++) {
 		for (j = -(gensize / 2); j < (gensize / 2) - 1; j++) {
 			// calculate the ground points
@@ -141,11 +135,7 @@ void light() {
 			0, 1, 0);
 		break;
 	}
-
-	// draw ball representing light ------------ lighting stuff
-	float Position[4] = { distance * Cos(zh), distance * Sin(zh), ylight, 1.0 };
-	glColor3f(1, 1, 1);
-	ball(Position[0], Position[1], Position[2], 5);
+	
 	// enable lighting stuff
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
@@ -155,22 +145,127 @@ void light() {
 	//  glColor sets ambient and diffuse color materials
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
-	// back to in shaders
-	glEnable(GL_LIGHT0);
-	// set the lighting stuff
-	float Ambient[] = {
-		.1, .1, .1, 1.0
-	};
-	float Diffuse[] = {
-		.5, .5, .5, 1.0
-	};
-	float Specular[] = {
-		0, 0, 0, 1.0
-	};
-	glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, Position);
+	// from 270 to 90 light increasing in brightness
+	// from 90 to 270 light decreasing in brightness
+	// for now just switch it on and off
+	if (zh > 180) {
+		bg[0] = 0;
+		bg[1] = 0;
+		bg[2] = 0;
+		glDisable(GL_LIGHT0);
+		glEnable(GL_LIGHT1);
+
+		/*
+		// set the lighting stuff
+		float Ambient[] = {
+			.0, .0, .0, 1.0
+		};
+		float Diffuse[] = {
+			.5, .5, .5, 1.0
+		};
+		float Specular[] = {
+			0, 0, 0, 1.0
+		};
+		float Position[4] = { 0, 5, 0, 1 };
+		glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
+		glLightfv(GL_LIGHT1, GL_POSITION, Position);
+		
+		float Direction[4] = { 0, 0, 0, 0 };
+		//  Set spotlight parameters
+		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, Direction);
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 60);
+		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 0);
+		*/
+
+		//  Translate intensity to color vectors
+		float ambient = 0;
+		float diffuse = 1;
+		float specular = 0;
+		float Ambient[] = { 0.01 * ambient ,0.01 * ambient ,0.01 * ambient ,1.0 };
+		float Diffuse[] = { 0.01 * diffuse ,0.01 * diffuse ,0.01 * diffuse ,1.0 };
+		float Specular[] = { 0.01 * specular,0.01 * specular,0.01 * specular,1.0 };
+		float Position[] = { 0, playerpos[1], 0, 1 };
+		//  Spotlight color and direction
+		float yellow[] = { 1.0,1.0,0.0,1.0 };
+		float Direction[] = { Cos(playerangle), 0, Sin(playerangle), 0 };
+		//  Draw light position as ball (still no lighting here)
+		ball(0, playerpos[1], 0, 0.1);
+		//  OpenGL should normalize normal vectors
+		glEnable(GL_NORMALIZE);
+		//  Enable lighting
+		glEnable(GL_LIGHTING);
+		//  Location of viewer for specular calculations
+		//glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, local);
+		//  Two sided mode
+		//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, side);
+		//  glColor sets ambient and diffuse color materials
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+		glEnable(GL_COLOR_MATERIAL);
+		//  Set specular colors
+		glMaterialfv(GL_FRONT, GL_SPECULAR, yellow);
+		glMaterialf(GL_FRONT, GL_SHININESS, .2);
+		//  Enable light 0
+		glEnable(GL_LIGHT0);
+		//  Set ambient, diffuse, specular components and position of light 0
+		glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
+		glLightfv(GL_LIGHT1, GL_POSITION, Position);
+		//  Set spotlight parameters
+		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, Direction);
+		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
+		glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, .2);
+		//  Set attenuation
+		glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.01);
+		glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0);
+		glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
+
+		// fog bc fog cool
+		glDisable(GL_FOG);
+		
+		glEnable(GL_FOG);
+		glFogf(GL_FOG_MODE, GL_EXP);
+		glFogfv(GL_FOG_COLOR, bg);
+		glFogf(GL_FOG_DENSITY, .1);
+		
+	}
+	else {
+		// background needs to reflect changes in time of day
+		bg[0] = 0.06;
+		bg[1] = .92;
+		bg[2] = .89;
+
+		// draw ball representing light ------------ lighting stuff
+		float Position[4] = { distance * Cos(zh), distance * Sin(zh), ylight, 1.0 };
+		glColor3f(1, .2, .2);
+		ball(Position[0], Position[1], Position[2], 5);
+		
+		glDisable(GL_LIGHT1);
+		glEnable(GL_LIGHT0);
+		// set the lighting stuff
+		float Ambient[] = {
+			.1, .1, .1, 1.0
+		};
+		float Diffuse[] = {
+			.5, .5, .5, 1.0
+		};
+		float Specular[] = {
+			0, 0, 0, 1.0
+		};
+		glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
+		glLightfv(GL_LIGHT0, GL_POSITION, Position);
+
+		// fog bc fog cool
+		glEnable(GL_FOG);
+		glFogf(GL_FOG_MODE, GL_EXP);
+		glFogfv(GL_FOG_COLOR, bg);
+		glFogf(GL_FOG_DENSITY, .02);
+	}
+	
 	// ------------------------------------------------------------- light stuff end
 }
 
@@ -187,7 +282,7 @@ void initdebug() {
 void idle() {
 	if (movelight) {
 		//  Elapsed time in seconds
-		double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
+		double t = glutGet(GLUT_ELAPSED_TIME) / 10000.0;
 		zh = fmod(90 * t, 360.0);
 	}
 	// redisplay the scene
@@ -231,6 +326,13 @@ void key(unsigned char ch, int x, int y) {
 	// whether or not to move the light
 	case '1':
 		movelight = !movelight;
+		break;
+	// lighting testing
+	case 'z':
+		zh += 30;
+		break;
+	case 'Z':
+		zh -= 30;
 		break;
 	default:
 		break;

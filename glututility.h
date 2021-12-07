@@ -49,8 +49,8 @@
 
 // Cosine and Sine in degrees
 // copying this from ex8 bc it's pretty useful
-#define Cos(x) (cos((x)*3.14159265/180))
-#define Sin(x) (sin((x)*3.14159265/180))
+#define Cos(x) (cos((x)*3.14159265/180.0))
+#define Sin(x) (sin((x)*3.14159265/180.0))
 
 // --- variables ---
 enum camera {
