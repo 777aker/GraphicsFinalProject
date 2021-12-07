@@ -22,6 +22,10 @@ typedef struct { double x, y, z; } Point;
 // x axis Point for computing stuff
 Point x1 = { 1,0,0 };
 
+// textures for trees
+// just need trunk and leaves probably
+unsigned int textures[2];
+
 // custom bezier function
 Point bezier(Point p0, Point p1, Point p2, Point p3, float t) {
 	Point bez;
@@ -177,68 +181,95 @@ void tree(int x, int y, int z) {
 		}
 
 		// now we gonna draw some boys
-		glColor3f(.8, .5, .4);
+		//glColor3f(.8, .5, .4);
+		glColor3f(1, 1, 1);
 		glEnable(GL_CULL_FACE);
+
+		// textures please
+		glEnable(GL_TEXTURE_2D);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+
 		glBegin(GL_QUADS);
 		for (int k = 0; k < m; k++) {
 
 			// fun fact, our normals are our offsets bc I'm cool like that
 			// first quad
+			float jk = (float) k / (float) (m);
+			float jkp1 = (float)(k + 1) / (float) (m);
+			float size = .5;
+			//printf("%f,%f\n", jk, jkp1);
 			glnormalpoint(offset1[k]);
+			glTexCoord2f(0, jk);
 			glvertex2points(bezpts[k], offset1[k]);
 
 			glnormalpoint(offset1[k + 1]);
+			glTexCoord2f(0, jkp1);
 			glvertex2points(bezpts[k + 1], offset1[k + 1]);
 
 			glnormalpoint(offset2[k + 1]);
+			glTexCoord2f(size, jkp1);
 			glvertex2points(bezpts[k + 1], offset2[k + 1]);
 
 			glnormalpoint(offset2[k]);
+			glTexCoord2f(size, jk);
 			glvertex2points(bezpts[k], offset2[k]);
 
 			// second quad
 			glnormalpoint(offset2[k]);
+			glTexCoord2f(size, jk);
 			glvertex2points(bezpts[k], offset2[k]);
 
 			glnormalpoint(offset2[k + 1]);
+			glTexCoord2f(size, jkp1);
 			glvertex2points(bezpts[k + 1], offset2[k + 1]);
 
 			glnormalpoint(offset3[k + 1]);
+			glTexCoord2f(2*size, jkp1);
 			glvertex2points(bezpts[k + 1], offset3[k + 1]);
 
 			glnormalpoint(offset3[k]);
+			glTexCoord2f(2*size, jk);
 			glvertex2points(bezpts[k], offset3[k]);
 
 			// thrid quad
 			glnormalpoint(offset3[k]);
+			glTexCoord2f(2*size, jk);
 			glvertex2points(bezpts[k], offset3[k]);
 			
 			glnormalpoint(offset3[k + 1]);
+			glTexCoord2f(2*size, jkp1);
 			glvertex2points(bezpts[k + 1], offset3[k + 1]);
 
 			glnormalpoint(offset4[k + 1]);
+			glTexCoord2f(3*size, jkp1);
 			glvertex2points(bezpts[k + 1], offset4[k + 1]);
 
 			glnormalpoint(offset4[k]);
+			glTexCoord2f(3*size, jk);
 			glvertex2points(bezpts[k], offset4[k]);
 
 			// forth quad
 			glnormalpoint(offset4[k]);
+			glTexCoord2f(3*size, jk);
 			glvertex2points(bezpts[k], offset4[k]);
 
 			glnormalpoint(offset4[k + 1]);
+			glTexCoord2f(3*size, jkp1);
 			glvertex2points(bezpts[k + 1], offset4[k + 1]);
 
 			// dang, should've done normal and points together in a function oh well
 			glnormalpoint(offset1[k + 1]);
+			glTexCoord2f(4*size, jkp1);
 			glvertex2points(bezpts[k + 1], offset1[k + 1]);
 
 			glnormalpoint(offset1[k]);
+			glTexCoord2f(4*size, jk);
 			glvertex2points(bezpts[k], offset1[k]);
 		}
 		glEnd();
 		glDisable(GL_CULL_FACE);
-		
+		glDisable(GL_TEXTURE_2D);
 	}
 
 	// we are done put it back
@@ -274,4 +305,8 @@ void branch(int parent, int iterations) {
 	// call the next recursive stuff
 	branch(thisparent, iterations);
 	branch(thisparent, iterations);
+}
+
+void treeinit() {
+	textures[0] = LoadTexBMP("textures/treeTrunks.bmp");
 }

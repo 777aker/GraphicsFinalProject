@@ -24,5 +24,6 @@ void light();
 // --- variables ---
 //extern type name; then define in c
 extern int gensize;
+extern float playerpos[3];
 
 #endif

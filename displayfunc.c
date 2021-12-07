@@ -76,34 +76,35 @@ void display() {
 			float pos4[3] = {i, perlin2d(xpos, zpos + 1, pfreq, pdep) + perlin2d(xpos, zpos + 1, pfreq/5, pdep*4), j + 1 };
 			// color for the ground
 			glColor3f(.2, 1, .2);
+			// grass texture ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ hhhmmm...idk I should move on
+			//glEnable(GL_TEXTURE_2D);
+			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			//glBindTexture(GL_TEXTURE_2D, grasstex);
 			// draw the ground
 			glBegin(GL_QUADS);
 			// calculate the normal for the ground quads
 			doanormal(pos1, pos2, pos3);
-			// grass texture
-			glBindTexture(GL_TEXTURE_2D, grasstex);
-			// um, texture math is a little weird
-			// I do it this way because I want the texture to go over the entire area
-			// at the size it was made. So the ground is gensize x gensize and I want 
-			// the texture to go across that once but also gotta move the texture as you move
-			// so can't just say 0,0 1,1 at the two edges but gotta make it weird so it repeats
-			// does that make any sense?
-			// draw the ground
-			int tx = (int)xpos;
-			int ty = (int)zpos;
-			//glTexCoord2f((tx % gensize) / gensize * 1.0, (ty % gensize) / gensize * 1.0);
-			//glTexCoord2f(i, j);
+
+			// this is some grass texture calculating stuff. I'm leaving it in case I wanna come back to trying to get it to work
+			/*
+			float tx = fabs(i);
+			float ty = fabs(j);
+			float factor = 5.0;
+			printf("%f,%f\n", tx / factor, ty / factor);
+			printf("%f,%f\n", tx, ty);
+			glTexCoord2f(tx/factor, ty/factor);
+			glTexCoord2f((tx + 1)/factor, ty/factor);
+			glTexCoord2f((tx + 1)/factor, (ty + 1)/factor);
+			glTexCoord2f(tx/factor, (ty + 1)/factor);
+			*/
+
 			glVertex3f(pos1[0], pos1[1], pos1[2]);
-			//glTexCoord2f(((tx + 1) % gensize) / gensize * 1.0, (ty % gensize) / gensize * 1.0);
-			//glTexCoord2f(i+1, j);
 			glVertex3f(pos2[0], pos2[1], pos2[2]);
-			//glTexCoord2f(((tx + 1) % gensize) / gensize * 1.0, ((ty + 1) % gensize) / gensize * 1.0);
-			//glTexCoord2f(i+1, j+1);
 			glVertex3f(pos3[0], pos3[1], pos3[2]);
-			//glTexCoord2f((tx % gensize) / gensize * 1.0, ((ty + 1) % gensize) / gensize * 1.0);
-			//glTexCoord2f(i, j + 1);
 			glVertex3f(pos4[0], pos4[1], pos4[2]);
+
 			glEnd();
+			//glDisable(GL_TEXTURE_2D);
 			// now it's time to populate this ground with some objects
 			// first set our location for consistent generation based on position
 			nLehmer = (int)zpos << 16 | (int)xpos;
@@ -127,7 +128,7 @@ void light() {
 	switch (proj) {
 	default:
 		proj = perspective;
-	case perspective:
+	case perspective: ; // semi colon black line for weird error
 		double Ex = -2 * dim * Sin(th) * Cos(ph);
 		double Ey = +2 * dim * Sin(ph);
 		double Ez = +2 * dim * Cos(th) * Cos(ph);
@@ -139,8 +140,13 @@ void light() {
 		break;
 	case firstperson:
 		playerpos[1] = perlin2d(playerpos[0], playerpos[2], pfreq, pdep) + perlin2d(playerpos[0], playerpos[2], pfreq / 5, pdep * 4) + 1.5;
-		gluLookAt(0, playerpos[1], 0,
-			Cos(playerangle), playerpos[1], Sin(playerangle),
+		// so, for efficiency, you build around 0, 0 for the terrain, and it's a for loop so it only generates at the integers because otherwise
+		// that's an insane number of vertices to calculate, so how do you make it smooth and the player go not 1 grid point at a time?
+		// you be a genius that's how
+		float decix = modf(playerpos[0], NULL);
+		float deciz = modf(playerpos[2], NULL);
+		gluLookAt(decix, playerpos[1], deciz,
+			decix + Cos(playerangle), playerpos[1], deciz + Sin(playerangle),
 			0, 1, 0);
 		break;
 	}
@@ -171,24 +177,17 @@ void light() {
 		float Ambient[] = { 0.01 * ambient ,0.01 * ambient ,0.01 * ambient ,1.0 };
 		float Diffuse[] = { 0.01 * diffuse ,0.01 * diffuse ,0.01 * diffuse ,1.0 };
 		float Specular[] = { 0.01 * specular,0.01 * specular,0.01 * specular,1.0 };
-		float Position[] = { 0, playerpos[1], 0, 1 };
+		float Position[] = { modf(playerpos[0], NULL), playerpos[1], modf(playerpos[2], NULL), 1 };
 		//  Spotlight color and direction
 		float yellow[] = { 1.0,1.0,0.0,1.0 };
 		float Direction[] = { Cos(playerangle), 0, Sin(playerangle), 0 };
 		//  Draw light position as ball (still no lighting here)
 		ball(0, playerpos[1], 0, 0.1);
-		//  OpenGL should normalize normal vectors
-		glEnable(GL_NORMALIZE);
-		//  Enable lighting
-		glEnable(GL_LIGHTING);
-		//  glColor sets ambient and diffuse color materials
-		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-		glEnable(GL_COLOR_MATERIAL);
+		
 		//  Set specular colors
 		glMaterialfv(GL_FRONT, GL_SPECULAR, yellow);
 		glMaterialf(GL_FRONT, GL_SHININESS, .2);
-		//  Enable light 0
-		glEnable(GL_LIGHT0);
+
 		//  Set ambient, diffuse, specular components and position of light 0
 		glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
 		glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
@@ -211,38 +210,52 @@ void light() {
 		
 	}
 	else {
-		// background needs to reflect changes in time of day
-		bg[0] = 0.06;
-		bg[1] = .92;
-		bg[2] = .89;
-
 		// draw ball representing light ------------ lighting stuff
 		float Position[4] = { distance * Cos(zh), distance * Sin(zh), ylight, 1.0 };
 		glColor3f(1, .2, .2);
 		ball(Position[0], Position[1], Position[2], 5);
+
+		// this is to make it darker as it goes from day to night
+		float dayness = Position[1] / 100;
+		// background needs to reflect changes in time of day
+		bg[0] = 0.06 * dayness;
+		bg[1] = .92 * dayness;
+		bg[2] = .89 * dayness;
 		
 		glDisable(GL_LIGHT1);
 		glEnable(GL_LIGHT0);
 		// set the lighting stuff
 		float Ambient[] = {
-			.1, .1, .1, 1.0
+			.1*dayness, .1*dayness, .1*dayness, 1.0
 		};
 		float Diffuse[] = {
-			.5, .5, .5, 1.0
+			.5*dayness, .5*dayness, .5*dayness, 1.0
 		};
 		float Specular[] = {
-			0, 0, 0, 1.0
+			.01, .01, .01, 1.0
 		};
+		//  Set specular colors
+		float yellow[] = { 1.0,1.0,0.0,1.0 };
+		glMaterialfv(GL_FRONT, GL_SPECULAR, yellow);
+		glMaterialf(GL_FRONT, GL_SHININESS, .2);
+
 		glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
 		glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
 		glLightfv(GL_LIGHT0, GL_POSITION, Position);
 
+		//  Set attenuation
+		// so idk why, but attenuation like this makes it snow during the day.....
+		// I'm definitely keeping this is looks so cool
+		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.01);
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0);
+
 		// fog bc fog cool
 		glEnable(GL_FOG);
 		glFogf(GL_FOG_MODE, GL_EXP);
 		glFogfv(GL_FOG_COLOR, bg);
-		glFogf(GL_FOG_DENSITY, .02);
+		glFogf(GL_FOG_DENSITY, .02/dayness);
 	}
 	
 	// ------------------------------------------------------------- light stuff end
@@ -259,10 +272,8 @@ void initdebug() {
 	playerpos[0] = Lehmer32() % 5000;
 	playerpos[2] = Lehmer32() % 5000;
 	// load our grass texture the only texture we draw in this file
-	glEnable(GL_TEXTURE_2D);
-	// I can't decide if I want modular or not so I'mma just leave this here
-	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	grasstex = LoadTexBMP("textures/grass.bmp");
+	treeinit();
 }
 
 // called when nothing else to do

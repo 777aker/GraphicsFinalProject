@@ -18,5 +18,7 @@ void tree(int x, int y, int z);
 void branch(int parent, int iterations);
 // the leaf generator that generates leaves at the end of a branch
 
+// need some intialization stuff
+void treeinit();
 
 #endif // !TREE_H

@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
 	glutIdleFunc(idle);
 
 	ErrCheck("display");
+	// initialize some stuff
 	initdebug();
 
 	// start

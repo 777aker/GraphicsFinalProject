@@ -55,8 +55,8 @@ float perlin2d(float x, float y, float freq, int depth)
     // so if you went to 0,0 it would mirror but since it's
     // perlin it's hard to tell and the odds of being able to find
     // 0,0 after starting in a random location with no shown coordinates is unlikely
-    x = abs(x);
-    y = abs(y);
+    x = fabs(x);
+    y = fabs(y);
 
     float xa = x * freq;
     float ya = y * freq;
