@@ -6,6 +6,7 @@ CSCI 5229 Fall 2021
 What you should do: hold down w
 Move around with like wasd eq
 Also turn your volume on
+Also wait a bit for the night scene too (like 20 seconds)
 
 Why I deserve an A:
 Because I made procedurally generated bezier curve trees
@@ -61,6 +62,9 @@ p: change projection types (orthogonal blank hit p again)
 Credits:
 Perlin noise equation: https://gist.github.com/nowl/828013
 Procedural Generation Tutorial: https://www.youtube.com/watch?v=ZZY9YE7rZJw
+Day Forest music: https://opengameart.org/content/forest-ambience
+Night Forest music: https://opengameart.org/content/creepy-forest-f
+Particle Engine: http://nehe.gamedev.net/tutorial/particle_engine_using_triangle_strips/21001/
 
 Done Requirements from proposal:
 - Walk in any direction forever and the scene will keep adding objects and terrain while removing far away objects and terrain.

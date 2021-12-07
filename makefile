@@ -7,7 +7,7 @@ all: $(EXE)
 #  Msys/MinGW
 ifeq "$(OS)" "Windows_NT"
 CFLG=-O3 -Wall -DUSEGLEW
-LIBS=-lfreeglut -lglew32 -lglu32 -lopengl32 -lm
+LIBS=-lfreeglut -lmingw32 -lSDL2main -lSDL2 -mwindows -lSDL2_mixer -lglew32 -lglu32 -lopengl32 -lm
 CLEAN=rm -f *.exe *.o *.a
 else
 #  OSX
@@ -30,6 +30,7 @@ displayfunc.o: displayfunc.c
 perlin.o: perlin.c
 lehmer.o: lehmer.c
 tree.o: tree.c
+audio.o: audio.c
 
 # Compile rules
 .c.o:
@@ -38,7 +39,7 @@ tree.o: tree.c
 	g++ -c $(CFLG)  $<
 
 # Link
-final:final.o glututility.o displayfunc.o perlin.o lehmer.o tree.o
+final:final.o glututility.o displayfunc.o perlin.o lehmer.o tree.o audio.o
 	gcc $(CFLG) -o $@ $^ $(LIBS)
 
 # Clean

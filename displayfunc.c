@@ -32,6 +32,11 @@ float pfreq = .2;
 float pdep = 1;
 // grass texture
 unsigned int grasstex;
+// I want a bobbing breathing effect
+float breath = 0;
+// for switching the music from night to day
+bool playthatfunkymusic = true;
+bool creepytime = false;
 
 void display() {
 	// erase the window and depth buffer
@@ -140,6 +145,8 @@ void light() {
 		break;
 	case firstperson:
 		playerpos[1] = perlin2d(playerpos[0], playerpos[2], pfreq, pdep) + perlin2d(playerpos[0], playerpos[2], pfreq / 5, pdep * 4) + 1.5;
+		// breathing effect
+		playerpos[1] += Sin(breath)/3;
 		// so, for efficiency, you build around 0, 0 for the terrain, and it's a for loop so it only generates at the integers because otherwise
 		// that's an insane number of vertices to calculate, so how do you make it smooth and the player go not 1 grid point at a time?
 		// you be a genius that's how
@@ -164,6 +171,12 @@ void light() {
 	// from 90 to 270 light decreasing in brightness
 	// for now just switch it on and off
 	if (zh > 180) {
+		// this is night time so play our night music
+		if (creepytime) {
+			playnight();
+			creepytime = false;
+			playthatfunkymusic = true;
+		}
 		bg[0] = 0;
 		bg[1] = 0;
 		bg[2] = 0;
@@ -210,6 +223,12 @@ void light() {
 		
 	}
 	else {
+		// it's day so play our day music
+		if (playthatfunkymusic) {
+			playday();
+			playthatfunkymusic = false;
+			creepytime = true;
+		}
 		// draw ball representing light ------------ lighting stuff
 		float Position[4] = { distance * Cos(zh), distance * Sin(zh), ylight, 1.0 };
 		glColor3f(1, .2, .2);
@@ -245,9 +264,9 @@ void light() {
 		glLightfv(GL_LIGHT0, GL_POSITION, Position);
 
 		//  Set attenuation
-		// so idk why, but attenuation like this makes it snow during the day.....
-		// I'm definitely keeping this is looks so cool
-		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.01);
+		// so snooowwwwwwwwww
+		// accidental discovery but it looks soooo cool
+		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.01/dayness);
 		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0);
 		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0);
 
@@ -274,15 +293,18 @@ void initdebug() {
 	// load our grass texture the only texture we draw in this file
 	grasstex = LoadTexBMP("textures/grass.bmp");
 	treeinit();
+	initaudio();
 }
 
 // called when nothing else to do
 void idle() {
+	//  Elapsed time in seconds
+	double t = glutGet(GLUT_ELAPSED_TIME) / 10000.0;
 	if (movelight) {
-		//  Elapsed time in seconds
-		double t = glutGet(GLUT_ELAPSED_TIME) / 10000.0;
 		zh = fmod(90 * t, 360.0);
 	}
+	// breathing effect
+	breath = fmod(90 * t * 5, 360.0);
 	// redisplay the scene
 	glutPostRedisplay();
 }
@@ -292,6 +314,7 @@ void key(unsigned char ch, int x, int y) {
 	switch (ch) {
 	// exit on ESC key
 	case 27:
+		closeaudio();
 		exit(0);
 		break;
 	// movement stuff

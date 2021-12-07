@@ -4,6 +4,7 @@
 #include "glututility.h"
 #include "perlin.h"
 #include "tree.h"
+#include "audio.h"
 
 // --- functions ---
 // do this when nothing else to do
