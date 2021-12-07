@@ -30,6 +30,8 @@ float playerangle = 0;
 // perlin stuff
 float pfreq = .2;
 float pdep = 1;
+// grass texture
+unsigned int grasstex;
 
 void display() {
 	// erase the window and depth buffer
@@ -57,7 +59,7 @@ void display() {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1 / 20);
-
+	
 	// filling in the space square by square
 	float i, j;
 	for (i = -(gensize / 2); i < (gensize / 2) - 1; i++) {
@@ -78,10 +80,28 @@ void display() {
 			glBegin(GL_QUADS);
 			// calculate the normal for the ground quads
 			doanormal(pos1, pos2, pos3);
+			// grass texture
+			glBindTexture(GL_TEXTURE_2D, grasstex);
+			// um, texture math is a little weird
+			// I do it this way because I want the texture to go over the entire area
+			// at the size it was made. So the ground is gensize x gensize and I want 
+			// the texture to go across that once but also gotta move the texture as you move
+			// so can't just say 0,0 1,1 at the two edges but gotta make it weird so it repeats
+			// does that make any sense?
 			// draw the ground
+			int tx = (int)xpos;
+			int ty = (int)zpos;
+			//glTexCoord2f((tx % gensize) / gensize * 1.0, (ty % gensize) / gensize * 1.0);
+			//glTexCoord2f(i, j);
 			glVertex3f(pos1[0], pos1[1], pos1[2]);
+			//glTexCoord2f(((tx + 1) % gensize) / gensize * 1.0, (ty % gensize) / gensize * 1.0);
+			//glTexCoord2f(i+1, j);
 			glVertex3f(pos2[0], pos2[1], pos2[2]);
+			//glTexCoord2f(((tx + 1) % gensize) / gensize * 1.0, ((ty + 1) % gensize) / gensize * 1.0);
+			//glTexCoord2f(i+1, j+1);
 			glVertex3f(pos3[0], pos3[1], pos3[2]);
+			//glTexCoord2f((tx % gensize) / gensize * 1.0, ((ty + 1) % gensize) / gensize * 1.0);
+			//glTexCoord2f(i, j + 1);
 			glVertex3f(pos4[0], pos4[1], pos4[2]);
 			glEnd();
 			// now it's time to populate this ground with some objects
@@ -92,17 +112,6 @@ void display() {
 				tree(i, pos1[1], j);
 			}
 		}
-	}
-
-	// disable lighting
-	glDisable(GL_LIGHTING);
-	// draw some information to screen for debugging
-	if (debug) {
-		/* I don't need this info anymore
-		glColor3f(1, 1, 1);
-		glWindowPos2i(5, 5);
-		Print("th = %d, ph = %d, dim = %f", th, ph, dim);
-		*/
 	}
 
 	ErrCheck("display");
@@ -155,30 +164,6 @@ void light() {
 		glDisable(GL_LIGHT0);
 		glEnable(GL_LIGHT1);
 
-		/*
-		// set the lighting stuff
-		float Ambient[] = {
-			.0, .0, .0, 1.0
-		};
-		float Diffuse[] = {
-			.5, .5, .5, 1.0
-		};
-		float Specular[] = {
-			0, 0, 0, 1.0
-		};
-		float Position[4] = { 0, 5, 0, 1 };
-		glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
-		glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
-		glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
-		glLightfv(GL_LIGHT1, GL_POSITION, Position);
-		
-		float Direction[4] = { 0, 0, 0, 0 };
-		//  Set spotlight parameters
-		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, Direction);
-		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 60);
-		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 0);
-		*/
-
 		//  Translate intensity to color vectors
 		float ambient = 0;
 		float diffuse = 1;
@@ -196,10 +181,6 @@ void light() {
 		glEnable(GL_NORMALIZE);
 		//  Enable lighting
 		glEnable(GL_LIGHTING);
-		//  Location of viewer for specular calculations
-		//glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, local);
-		//  Two sided mode
-		//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, side);
 		//  glColor sets ambient and diffuse color materials
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glEnable(GL_COLOR_MATERIAL);
@@ -223,8 +204,6 @@ void light() {
 		glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
 
 		// fog bc fog cool
-		glDisable(GL_FOG);
-		
 		glEnable(GL_FOG);
 		glFogf(GL_FOG_MODE, GL_EXP);
 		glFogfv(GL_FOG_COLOR, bg);
@@ -273,9 +252,17 @@ void light() {
 // it's set up nicely so I'm just going to use it
 // for intializing everything
 void initdebug() {
+	// random start location
+	// random lehmer seed
 	nLehmer = rand() % 256;
+	// really big random possibility space
 	playerpos[0] = Lehmer32() % 5000;
 	playerpos[2] = Lehmer32() % 5000;
+	// load our grass texture the only texture we draw in this file
+	glEnable(GL_TEXTURE_2D);
+	// I can't decide if I want modular or not so I'mma just leave this here
+	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	grasstex = LoadTexBMP("textures/grass.bmp");
 }
 
 // called when nothing else to do
@@ -327,7 +314,7 @@ void key(unsigned char ch, int x, int y) {
 	case '1':
 		movelight = !movelight;
 		break;
-	// lighting testing
+	// lighting testing, lets you move the light manually
 	case 'z':
 		zh += 30;
 		break;

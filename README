@@ -3,16 +3,17 @@ Final Project
 Kelley Kelley
 CSCI 5229 Fall 2021
 
-Run: classic make then ./main
-
 What you should do: hold down w
-(if you rotate with eq then move around it is a little jumpy
-due to how I round the position)
+Move around with like wasd eq
+Also turn your volume on
+
 Why I deserve an A:
 Because I made procedurally generated bezier curve trees
 So technically anyone who has a finite space I did infinite more work
 then them since I generate infinite more objects and space
 that's how that works right????
+There's also some other random cool ish nonsense but that's the most
+spectacular and outstanding really
 
 What I mean by bezier curve trees: each tree is multiple bezier curves
 first I generate a set of points that represent the trees control points
@@ -20,14 +21,6 @@ then I build sets of control points based on those
 then I make them into a bezier curve
 then I take the derivative of that to build a normal vector so I can
 thicken the tree
-
-What I need to do is listed way below, but honestly I may just end up
-making the trees more efficient and prettier bc I don't wanna do the other
-stuff just want to make the perfect trees forever...but if you tell me do the
-other stuff I guess I'll do them instead of these dumb trees that I've definitely
-spent way way too long on
-(make them prettier by messing with parameters, making them more efficient so 
-I can draw more, adding leaves)
 
 Time Spent:
 oh, oops, forgot this was a thing
@@ -43,6 +36,9 @@ so 40 ish hrs give or take 40
 (I put way too many hours into trees (did like 10 different methods))
 (plus bezier took me way too long to wrap my head around)
 (this is problamatic I don't think I'm getting an A)
+I started forgetting again to record this
+like, 5 ish
++ another 5
 
 Key Bindings
 Player Controls:
@@ -51,6 +47,7 @@ eq: rotate view
 
 Light Controls:
 1: stops light from moving
+z/Z: move the light (have to stop it first)
 
 Grading/Debug Controls:
 ESC: exit on ESC key
@@ -66,19 +63,20 @@ Done Requirements from proposal:
 - Walk in any direction forever and the scene will keep adding objects and terrain while removing far away objects and terrain.
 - Procedurally generated forest
 - Terrain change in elevation but player remain same height on ground
+- different day night cycle.
+- Day is typical forest lit by one revolving light source
+- Night player has flashlight and scenery changes to be spookier
+- did sound because I wanted to not in my proposal
 
 Need to do.....dang.....yea that's all not getting done oops
 spent way too long on just niiiiccceeeee trees
-- drastically different day night cycle.
 - AI that moves toward the player during the day and away from the player at night
 - AI monster from front but simple and friendly from behind
-- Day is typical forest lit by one revolving light source
-- Night player has flashlight and scenery changes to be spookier, with shaders on it
+- shaders on it
 - Trees will have different textures, branches will move, lighting within the trees like lightning bugs and stars.
 - Objects generated: trees, fallen logs, bushes, each with a bit of randomness to them.
 - When AI is close during the day red veins grow on the screen.
 - When AI is far at night cold snowy effect on screen
-- For easier grading: turn AI off, can move up and down freely, can control the time/day night cycle
 
 Stretch Goals:
 1) player collision with procedural objects

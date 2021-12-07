@@ -4,6 +4,7 @@
 int nLehmer = 0;
 
 // simple quick seed based random number generator
+// based on tutorial credited in readme
 uint32_t Lehmer32() {
 	nLehmer += 0xe120fc15;
 	uint64_t tmp;

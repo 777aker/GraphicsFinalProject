@@ -19,10 +19,8 @@ int main(int argc, char* argv[]) {
 	glutKeyboardFunc(key);
 	glutIdleFunc(idle);
 
-	ErrCheck("init");
-	if (debug) {
-		initdebug();
-	}
+	ErrCheck("display");
+	initdebug();
 
 	// start
 	glutMainLoop();
