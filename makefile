@@ -14,11 +14,11 @@ else
 ifeq "$(shell uname)" "Darwin"
 RES=$(shell uname -r|sed -E 's/(.).*/\1/'|tr 12 21)
 CFLG=-O3 -Wall -Wno-deprecated-declarations -DRES=$(RES)
-LIBS=-framework GLUT -framework OpenGL
+LIBS=-framework GLUT -lSDL2main -lSDL2 -lSDL2_mixer -framework Cocoa -framework OpenGL
 #  Linux/Unix/Solaris
 else
 CFLG=-O3 -Wall
-LIBS=-lglut -lGLU -lGL -lm
+LIBS=-lglut -lSDL2 -lSDL2_mixer -lGLU -lGL -lm
 endif
 #  OSX/Linux/Unix/Solaris
 CLEAN=rm -f $(EXE) *.o *.a
