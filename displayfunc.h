@@ -5,6 +5,7 @@
 #include "perlin.h"
 #include "tree.h"
 #include "audio.h"
+#include "particleengine.h"
 
 // --- functions ---
 // do this when nothing else to do

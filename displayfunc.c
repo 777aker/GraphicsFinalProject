@@ -16,7 +16,7 @@ int ph = 15;
 int gensize = 200;
 // sun stuff ---------------------------- light stuff
 //float Position[4];
-double zh = 180;
+double zh = 0;
 int distance = 100;
 int ylight = 0;
 int local = 0;
@@ -37,6 +37,8 @@ float breath = 0;
 // for switching the music from night to day
 bool playthatfunkymusic = true;
 bool creepytime = false;
+// modf seg faults on linux without a pointer so gotta go through and fix that
+double modfthrowaway;
 
 void display() {
 	// erase the window and depth buffer
@@ -120,6 +122,9 @@ void display() {
 		}
 	}
 
+	// particle system?
+	dotheparticles();
+
 	ErrCheck("display");
 	glFlush();
 	glutSwapBuffers();
@@ -150,8 +155,8 @@ void light() {
 		// so, for efficiency, you build around 0, 0 for the terrain, and it's a for loop so it only generates at the integers because otherwise
 		// that's an insane number of vertices to calculate, so how do you make it smooth and the player go not 1 grid point at a time?
 		// you be a genius that's how
-		float decix = modf(playerpos[0], NULL);
-		float deciz = modf(playerpos[2], NULL);
+		float decix = modf(playerpos[0], &modfthrowaway);
+		float deciz = modf(playerpos[2], &modfthrowaway);
 		gluLookAt(decix, playerpos[1], deciz,
 			decix + Cos(playerangle), playerpos[1], deciz + Sin(playerangle),
 			0, 1, 0);
@@ -190,7 +195,7 @@ void light() {
 		float Ambient[] = { 0.01 * ambient ,0.01 * ambient ,0.01 * ambient ,1.0 };
 		float Diffuse[] = { 0.01 * diffuse ,0.01 * diffuse ,0.01 * diffuse ,1.0 };
 		float Specular[] = { 0.01 * specular,0.01 * specular,0.01 * specular,1.0 };
-		float Position[] = { modf(playerpos[0], NULL), playerpos[1], modf(playerpos[2], NULL), 1 };
+		float Position[] = { modf(playerpos[0], &modfthrowaway), playerpos[1], modf(playerpos[2], &modfthrowaway), 1 };
 		//  Spotlight color and direction
 		float yellow[] = { 1.0,1.0,0.0,1.0 };
 		float Direction[] = { Cos(playerangle), 0, Sin(playerangle), 0 };
@@ -220,7 +225,6 @@ void light() {
 		glFogf(GL_FOG_MODE, GL_EXP);
 		glFogfv(GL_FOG_COLOR, bg);
 		glFogf(GL_FOG_DENSITY, .1);
-		
 	}
 	else {
 		// it's day so play our day music
@@ -294,6 +298,7 @@ void initdebug() {
 	grasstex = LoadTexBMP("textures/grass.bmp");
 	treeinit();
 	initaudio();
+	initparticles();
 }
 
 // called when nothing else to do
@@ -310,7 +315,8 @@ void idle() {
 }
 
 // called when key is pressed
-void key(unsigned char ch, int x, int y) {
+void key(unsigned char ch, int kx, int y) {
+	float x, z;
 	switch (ch) {
 	// exit on ESC key
 	case 27:
@@ -318,21 +324,33 @@ void key(unsigned char ch, int x, int y) {
 		exit(0);
 		break;
 	// movement stuff
-	case 'w':
-		playerpos[0] += Cos(playerangle);
-		playerpos[2] += Sin(playerangle);
+	case 'w': ;
+		x = Cos(playerangle);
+		z = Sin(playerangle);
+		moveparticles(x,z);
+		playerpos[0] += x;
+		playerpos[2] += z;
 		break;
-	case 's':
-		playerpos[0] -= Cos(playerangle);
-		playerpos[2] -= Sin(playerangle);
+	case 's': ;
+		x = Cos(playerangle);
+		z = Sin(playerangle);
+		moveparticles(x,z);
+		playerpos[0] -= x;
+		playerpos[2] -= z;
 		break;
-	case 'a':
-		playerpos[0] -= Cos(playerangle + 90);
-		playerpos[2] -= Sin(playerangle + 90);
+	case 'a': ;
+		x = Cos(playerangle+90);
+		z = Sin(playerangle+90);
+		moveparticles(x,z);
+		playerpos[0] -= x;
+		playerpos[2] -= z;
 		break;
-	case 'd':
-		playerpos[0] += Cos(playerangle + 90);
-		playerpos[2] += Sin(playerangle + 90);
+	case 'd': ;
+		x = Cos(playerangle+90);
+		z = Sin(playerangle+90);
+		moveparticles(x,z);
+		playerpos[0] += x;
+		playerpos[2] += z;
 		break;
 	case 'e':
 		playerangle += 2;
