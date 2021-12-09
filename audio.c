@@ -22,8 +22,7 @@ void initaudio() {
 		printf("SDL_mixer no work %s\n", Mix_GetError());
 	}
 	loadMedia();
-	printf("Succeeded init\n");
-	playday();
+	//playday();
 }
 
 void playnight() {

@@ -6,7 +6,10 @@ CSCI 5229 Fall 2021
 What you should do: hold down w
 Move around with like wasd eq
 Also turn your volume on
-Also wait a bit for the night scene too (like 20 seconds)
+Also wait a bit for the night scene too (like 20 seconds) 
+(the transition is cool so there isn't a shortcut for that)
+(I tried for awhile to get the snow not to wobble when you move
+diagonally but I just can't figure it out)
 
 Why I deserve an A:
 Because I made procedurally generated bezier curve trees
@@ -42,7 +45,8 @@ like, 5 ish
 + another 5
 + like another 5
 + 3
-so maybe like 68 ish hours total? idk. give or take like 65 hours
++ 4 
+so maybe like 72 ish hours total? idk. give or take like 65 hours
 
 Key Bindings
 Player Controls:

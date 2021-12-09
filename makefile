@@ -31,6 +31,7 @@ perlin.o: perlin.c
 lehmer.o: lehmer.c
 tree.o: tree.c
 audio.o: audio.c
+particleengine.o: particleengine.c
 
 # Compile rules
 .c.o:
@@ -39,7 +40,7 @@ audio.o: audio.c
 	g++ -c $(CFLG)  $<
 
 # Link
-final:final.o glututility.o displayfunc.o perlin.o lehmer.o tree.o audio.o
+final:final.o glututility.o displayfunc.o perlin.o lehmer.o tree.o audio.o particleengine.o
 	gcc $(CFLG) -o $@ $^ $(LIBS)
 
 # Clean
