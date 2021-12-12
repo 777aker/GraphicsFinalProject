@@ -12,6 +12,7 @@
 // particle struct
 typedef struct {
 	float life;
+	//float fade;
 
 	float r;
 	float g;
@@ -22,6 +23,8 @@ typedef struct {
 	float z;
 
 	float yi;
+	//float xi;
+	//float zi;
 } particle;
 
 float gravity = 0.004;
